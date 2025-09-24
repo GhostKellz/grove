@@ -1,6 +1,8 @@
 # Grove
 
-![Grove](assets/icons/grove.png)
+<div align="center">
+  <img src="assets/icons/grove.png" alt="Grove" width="175"/>
+</div>
 
 ![Zig](https://img.shields.io/badge/Built%20with-Zig-yellow?logo=zig)
 ![Version](https://img.shields.io/badge/Zig-0.16.0--dev-orange?logo=zig)
