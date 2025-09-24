@@ -20,6 +20,13 @@ Grove is a modern Zig wrapper around the Tree-sitter parsing library, focusing o
 - **Ergonomics**: Clean Zig API over the proven Tree-sitter runtime
 - **Integration**: Purpose-built for text editors with LSP support
 
+## Disclaimer
+
+⚠️ **EXPERIMENTAL LIBRARY - FOR LAB/PERSONAL USE** ⚠️
+
+> This is an experimental library under active development. It is intended for research, learning, and personal projects. The API is subject to change and should not be used in production environments without thorough testing and understanding of its limitations.
+
+
 ## Bundled Grammars
 
 - **Zig** (`maxxnino/tree-sitter-zig` – commit a80a6e9, vendored). Exposed via `grove.Languages.zig.get()`.
