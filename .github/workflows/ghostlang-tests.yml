@@ -1,0 +1,92 @@
+name: Ghostlang Utilities
+
+on:
+  push:
+    paths:
+      - 'src/editor/**'
+      - 'vendor/grammars/ghostlang/**'
+      - 'src/utilities/**'
+      - 'queries/**'
+  pull_request:
+    paths:
+      - 'src/editor/**'
+      - 'vendor/grammars/ghostlang/**'
+      - 'src/utilities/**'
+      - 'queries/**'
+
+jobs:
+  ghostlang-utilities:
+    name: Test Ghostlang Utilities
+    runs-on: [self-hosted, nvidia, gpu, zig, palladium]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Cache Zig dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/zig
+          zig-cache
+          zig-out
+        key: ${{ runner.os }}-zig-ghostlang-${{ hashFiles('build.zig', 'build.zig.zon') }}
+        restore-keys: |
+          ${{ runner.os }}-zig-ghostlang-
+          ${{ runner.os }}-zig-
+
+    - name: Build Grove with Ghostlang support
+      run: zig build -Dghostlang=true
+
+    - name: Test documentSymbols()
+      run: zig build test --filter "documentSymbols"
+
+    - name: Test foldingRanges()
+      run: zig build test --filter "foldingRanges"
+
+    - name: Test highlight()
+      run: zig build test --filter "highlight"
+
+    - name: Test textobjectAt()
+      run: zig build test --filter "textobjectAt"
+
+    - name: Run Ghostlang utilities tests
+      run: zig build test --filter "ghostlang utilities"
+
+    - name: Performance benchmarks
+      run: |
+        zig build bench --filter "ghostlang"
+        zig build bench --filter "performance"
+
+    - name: Test with sample .gza files
+      run: |
+        if [ -d "examples" ]; then
+          for file in examples/*.gza; do
+            if [ -f "$file" ]; then
+              echo "Testing $file"
+              zig run src/main.zig -- test "$file"
+            fi
+          done
+        fi
+
+    - name: Archive performance results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ghostlang-performance-${{ github.sha }}
+        path: |
+          zig-out/bench/
+          performance-results.json
+        retention-days: 7
+
+    - name: Upload test coverage
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ghostlang-coverage-${{ github.sha }}
+        path: |
+          coverage/
+          zig-out/coverage/
+        retention-days: 7

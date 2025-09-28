@@ -1,0 +1,57 @@
+name: Grove CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-core:
+    name: Test Grove Core
+    runs-on: [self-hosted, nvidia, gpu, zig, palladium]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Cache Zig dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/zig
+          zig-cache
+          zig-out
+        key: ${{ runner.os }}-zig-${{ hashFiles('build.zig', 'build.zig.zon') }}
+        restore-keys: |
+          ${{ runner.os }}-zig-
+
+    - name: Build Grove core
+      run: zig build
+
+    - name: Test tree-sitter parsing
+      run: zig build test --filter "tree-sitter"
+
+    - name: Test Ghostlang grammar
+      run: zig build test --filter "ghostlang"
+
+    - name: Run utility tests
+      run: zig build test --filter "utilities"
+
+    - name: Run all tests
+      run: zig build test
+
+    - name: Build benchmarks
+      run: zig build bench
+
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ github.sha }}
+        path: |
+          zig-out/test/
+          test-output.xml
+        retention-days: 7

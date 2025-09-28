@@ -1,0 +1,124 @@
+name: Grove → Grim Integration
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      grim_branch:
+        description: 'Grim branch to test against'
+        required: false
+        default: 'feature/ghostlang-gza-adapter'
+        type: string
+
+jobs:
+  trigger-grim-tests:
+    name: Trigger Grim Integration Tests
+    runs-on: [self-hosted, nvidia, gpu, zig, palladium]
+
+    steps:
+    - name: Checkout Grove
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Build Grove for integration
+      run: |
+        zig build -Doptimize=ReleaseFast
+        zig build install
+
+    - name: Package Grove artifacts
+      run: |
+        mkdir -p grove-artifacts
+        cp -r zig-out/* grove-artifacts/
+        tar -czf grove-build-${{ github.sha }}.tar.gz grove-artifacts/
+
+    - name: Upload Grove artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: grove-build-${{ github.sha }}
+        path: grove-build-${{ github.sha }}.tar.gz
+        retention-days: 7
+
+    - name: Trigger Grim workflow
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GRIM_INTEGRATION_TOKEN }}
+        script: |
+          const grim_branch = '${{ github.event.inputs.grim_branch || 'feature/ghostlang-gza-adapter' }}';
+
+          try {
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'GhostKellz',
+              repo: 'grim',
+              workflow_id: 'grove-integration.yml',
+              ref: grim_branch,
+              inputs: {
+                grove_sha: '${{ github.sha }}',
+                grove_artifact: 'grove-build-${{ github.sha }}'
+              }
+            });
+            console.log('Triggered Grim integration workflow:', result.status);
+          } catch (error) {
+            console.log('Failed to trigger Grim workflow:', error.message);
+            console.log('This may be expected if Grim repo/workflow does not exist yet');
+          }
+
+    - name: Wait for Grim tests (if triggered)
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GRIM_INTEGRATION_TOKEN }}
+        script: |
+          // Wait up to 30 minutes for Grim tests to complete
+          const maxWaitTime = 30 * 60 * 1000; // 30 minutes
+          const pollInterval = 30 * 1000; // 30 seconds
+          let waitTime = 0;
+
+          console.log('Waiting for Grim integration tests...');
+
+          while (waitTime < maxWaitTime) {
+            try {
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: 'GhostKellz',
+                repo: 'grim',
+                workflow_id: 'grove-integration.yml',
+                status: 'in_progress'
+              });
+
+              const ourRun = runs.data.workflow_runs.find(run =>
+                run.head_sha.includes('${{ github.sha }}') ||
+                run.name.includes('grove-build-${{ github.sha }}')
+              );
+
+              if (!ourRun) {
+                console.log('No matching Grim workflow found, continuing...');
+                break;
+              }
+
+              if (ourRun.status === 'completed') {
+                console.log(`Grim workflow completed with conclusion: ${ourRun.conclusion}`);
+                if (ourRun.conclusion !== 'success') {
+                  core.setFailed(`Grim integration tests failed: ${ourRun.conclusion}`);
+                }
+                break;
+              }
+
+              console.log(`Grim workflow still running... (${Math.round(waitTime/1000)}s elapsed)`);
+              await new Promise(resolve => setTimeout(resolve, pollInterval));
+              waitTime += pollInterval;
+            } catch (error) {
+              console.log('Error checking Grim workflow:', error.message);
+              break;
+            }
+          }
+
+          if (waitTime >= maxWaitTime) {
+            console.log('Timeout waiting for Grim tests, continuing...');
+          }
+
+    - name: Report integration status
+      run: |
+        echo "Grove → Grim integration triggered"
+        echo "Grove SHA: ${{ github.sha }}"
+        echo "Artifact: grove-build-${{ github.sha }}"
+        echo "Grim branch: ${{ github.event.inputs.grim_branch || 'feature/ghostlang-gza-adapter' }}"

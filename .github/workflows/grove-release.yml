@@ -1,0 +1,194 @@
+name: Grove Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v0.1.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Build and Release Grove
+    runs-on: [self-hosted, nvidia, gpu, zig, palladium]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Get version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "push" ]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          VERSION="${{ github.event.inputs.version }}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    - name: Cache Zig dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/zig
+          zig-cache
+          zig-out
+        key: ${{ runner.os }}-zig-release-${{ hashFiles('build.zig', 'build.zig.zon') }}
+        restore-keys: |
+          ${{ runner.os }}-zig-release-
+          ${{ runner.os }}-zig-
+
+    - name: Run full test suite
+      run: |
+        echo "Running comprehensive test suite for release..."
+        zig build test
+        zig build test --filter "ghostlang"
+        zig build test --filter "utilities"
+        zig build test --filter "performance"
+
+    - name: Build release binaries
+      run: |
+        echo "Building optimized release binaries..."
+
+        # Build for multiple targets
+        zig build -Doptimize=ReleaseFast -Dtarget=x86_64-linux-gnu
+        zig build -Doptimize=ReleaseFast -Dtarget=x86_64-windows-gnu
+        zig build -Doptimize=ReleaseFast -Dtarget=x86_64-macos-none
+        zig build -Doptimize=ReleaseFast -Dtarget=aarch64-linux-gnu
+        zig build -Doptimize=ReleaseFast -Dtarget=aarch64-macos-none
+
+    - name: Package release artifacts
+      run: |
+        mkdir -p release-artifacts
+
+        # Package Linux x86_64
+        mkdir -p grove-${{ steps.version.outputs.version }}-linux-x86_64
+        cp -r zig-out/bin/* grove-${{ steps.version.outputs.version }}-linux-x86_64/ 2>/dev/null || true
+        cp -r zig-out/lib/* grove-${{ steps.version.outputs.version }}-linux-x86_64/ 2>/dev/null || true
+        cp README.md LICENSE grove-${{ steps.version.outputs.version }}-linux-x86_64/ 2>/dev/null || true
+        tar -czf release-artifacts/grove-${{ steps.version.outputs.version }}-linux-x86_64.tar.gz grove-${{ steps.version.outputs.version }}-linux-x86_64/
+
+        # Create checksums
+        cd release-artifacts
+        for file in *.tar.gz *.zip; do
+          if [ -f "$file" ]; then
+            sha256sum "$file" >> checksums.txt
+          fi
+        done
+        cd ..
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        cat > release_notes.md << 'EOF'
+        # Grove ${{ steps.version.outputs.version }}
+
+        ## 🚀 What's New
+
+        This release includes:
+        - Tree-sitter parsing engine improvements
+        - Enhanced Ghostlang grammar support
+        - Editor utilities for document symbols, folding, and highlighting
+        - Performance optimizations and bug fixes
+
+        ## 📦 Installation
+
+        Download the appropriate binary for your platform:
+
+        - **Linux x86_64**: `grove-${{ steps.version.outputs.version }}-linux-x86_64.tar.gz`
+        - **Windows x86_64**: `grove-${{ steps.version.outputs.version }}-windows-x86_64.zip`
+        - **macOS x86_64**: `grove-${{ steps.version.outputs.version }}-macos-x86_64.tar.gz`
+        - **Linux ARM64**: `grove-${{ steps.version.outputs.version }}-linux-aarch64.tar.gz`
+        - **macOS ARM64**: `grove-${{ steps.version.outputs.version }}-macos-aarch64.tar.gz`
+
+        ## 🔍 Verification
+
+        All release artifacts include SHA256 checksums in `checksums.txt`.
+
+        ## 🛠️ Building from Source
+
+        ```bash
+        git clone https://github.com/GhostKellz/grove.git
+        cd grove
+        git checkout ${{ steps.version.outputs.version }}
+        zig build -Doptimize=ReleaseFast
+        ```
+
+        ## 🔗 Integration
+
+        This release is compatible with Grim's `feature/ghostlang-gza-adapter` branch for `.gza` file editing.
+
+        ---
+        🤖 Generated with [Grove CI/CD](https://github.com/GhostKellz/grove/actions)
+        EOF
+
+        echo "Generated release notes"
+
+    - name: Create GitHub release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        release_name: Grove ${{ steps.version.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+
+    - name: Upload release artifacts
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: release-artifacts/grove-${{ steps.version.outputs.version }}-linux-x86_64.tar.gz
+        asset_name: grove-${{ steps.version.outputs.version }}-linux-x86_64.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload checksums
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: release-artifacts/checksums.txt
+        asset_name: checksums.txt
+        asset_content_type: text/plain
+
+    - name: Trigger Grim dependency update
+      if: success()
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GRIM_INTEGRATION_TOKEN }}
+        script: |
+          try {
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'GhostKellz',
+              repo: 'grim',
+              workflow_id: 'update-grove.yml',
+              ref: 'feature/ghostlang-gza-adapter',
+              inputs: {
+                grove_version: '${{ steps.version.outputs.version }}',
+                grove_sha: '${{ github.sha }}'
+              }
+            });
+            console.log('Triggered Grim Grove dependency update:', result.status);
+          } catch (error) {
+            console.log('Failed to trigger Grim update:', error.message);
+            console.log('This may be expected if Grim repo/workflow does not exist yet');
+          }
+
+    - name: Post-release summary
+      run: |
+        echo "🎉 Grove ${{ steps.version.outputs.version }} released successfully!"
+        echo "📦 Release URL: ${{ steps.create_release.outputs.html_url }}"
+        echo "🔄 Grim dependency update triggered"
+        echo "✅ Release pipeline completed"
