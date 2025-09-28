@@ -17,6 +17,21 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Set up tree-sitter dependencies
+      run: |
+        mkdir -p vendor/tree-sitter/lib/include/tree_sitter vendor/tree-sitter/lib/src
+
+        # Download and extract tree-sitter v0.22.6
+        curl -L https://github.com/tree-sitter/tree-sitter/archive/v0.22.6.tar.gz | tar xz
+        cp -r tree-sitter-0.22.6/lib/* vendor/tree-sitter/lib/
+
+        # Copy required headers to include directory
+        cp tree-sitter-0.22.6/lib/include/tree_sitter/parser.h vendor/tree-sitter/lib/include/tree_sitter/
+        cp tree-sitter-0.22.6/lib/src/alloc.h vendor/tree-sitter/lib/include/tree_sitter/
+
+        # Clean up downloaded files
+        rm -rf tree-sitter-0.22.6
+
     - name: Cache Zig dependencies
       uses: actions/cache@v4
       with:

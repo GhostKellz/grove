@@ -28,19 +28,14 @@ pub fn build(b: *std.Build) void {
     // to our consumers. We must give it a name because a Zig package can expose
     // multiple modules and consumers will need to be able to specify which
     // module they want to access.
-    const tree_sitter_include = b.path("archive/tree-sitter/lib/include");
-    const tree_sitter_source = b.path("archive/tree-sitter/lib/src/lib.c");
+    const tree_sitter_include = b.path("vendor/tree-sitter/lib/include");
+    const tree_sitter_source = b.path("vendor/tree-sitter/lib/src/lib.c");
     const json_grammar_source = b.path("vendor/grammars/json/parser.c");
     const zig_grammar_source = b.path("vendor/grammars/zig/parser.c");
     const ghostlang_grammar_source = b.path("vendor/grammars/ghostlang/parser.c");
-    const rust_grammar_source = b.path("archive/tree-sitter-rust/src/parser.c");
-    const rust_scanner_source = b.path("archive/tree-sitter-rust/src/scanner.c");
-    const rust_include_path = b.path("archive/tree-sitter-rust/src");
-    const typescript_grammar_source = b.path("vendor/grammars/typescript/parser.c");
-    const typescript_scanner_source = b.path("vendor/grammars/typescript/scanner.c");
-    const tsx_grammar_source = b.path("vendor/grammars/tsx/parser.c");
-    const tsx_scanner_source = b.path("vendor/grammars/tsx/scanner.c");
-    const common_include_path = b.path("vendor/grammars/common");
+    // const rust_grammar_source = b.path("vendor/tree-sitter-rust/src/parser.c");
+    // const rust_scanner_source = b.path("vendor/tree-sitter-rust/src/scanner.c");
+    // const rust_include_path = b.path("vendor/tree-sitter-rust/src");
     const tree_sitter_flags = &.{
         "-std=c99",
         "-DTREE_SITTER_STATIC=1",
@@ -65,14 +60,9 @@ pub fn build(b: *std.Build) void {
     mod.addCSourceFile(.{ .file = json_grammar_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = zig_grammar_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = ghostlang_grammar_source, .flags = &.{"-std=c99"} });
-    mod.addCSourceFile(.{ .file = rust_grammar_source, .flags = &.{"-std=c99"} });
-    mod.addCSourceFile(.{ .file = rust_scanner_source, .flags = &.{"-std=c99"} });
-    mod.addCSourceFile(.{ .file = typescript_grammar_source, .flags = &.{"-std=c99"} });
-    mod.addCSourceFile(.{ .file = typescript_scanner_source, .flags = &.{"-std=c99"} });
-    mod.addCSourceFile(.{ .file = tsx_grammar_source, .flags = &.{"-std=c99"} });
-    mod.addCSourceFile(.{ .file = tsx_scanner_source, .flags = &.{"-std=c99"} });
-    mod.addIncludePath(rust_include_path);
-    mod.addIncludePath(common_include_path);
+    // mod.addCSourceFile(.{ .file = rust_grammar_source, .flags = &.{"-std=c99"} });
+    // mod.addCSourceFile(.{ .file = rust_scanner_source, .flags = &.{"-std=c99"} });
+    // mod.addIncludePath(rust_include_path);
 
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function
@@ -116,7 +106,7 @@ pub fn build(b: *std.Build) void {
         }),
     });
     exe.addIncludePath(tree_sitter_include);
-    exe.addIncludePath(rust_include_path);
+    // exe.addIncludePath(rust_include_path);
     exe.linkLibC();
 
     // This declares intent for the executable to be installed into the
@@ -158,7 +148,7 @@ pub fn build(b: *std.Build) void {
         .root_module = mod,
     });
     mod_tests.addIncludePath(tree_sitter_include);
-    mod_tests.addIncludePath(rust_include_path);
+    // mod_tests.addIncludePath(rust_include_path);
     mod_tests.linkLibC();
 
     // A run step that will run the test executable.
@@ -171,7 +161,7 @@ pub fn build(b: *std.Build) void {
         .root_module = exe.root_module,
     });
     exe_tests.addIncludePath(tree_sitter_include);
-    exe_tests.addIncludePath(rust_include_path);
+    // exe_tests.addIncludePath(rust_include_path);
     exe_tests.linkLibC();
 
     // A run step that will run the second test executable.
@@ -196,191 +186,13 @@ pub fn build(b: *std.Build) void {
         }),
     });
     bench_exe.addIncludePath(tree_sitter_include);
-    bench_exe.addIncludePath(rust_include_path);
+    // bench_exe.addIncludePath(rust_include_path);
     bench_exe.linkLibC();
     const run_bench = b.addRunArtifact(bench_exe);
     run_bench.step.dependOn(b.getInstallStep());
 
     const bench_step = b.step("bench", "Run performance benchmarks");
     bench_step.dependOn(&run_bench.step);
-
-    const incremental_bench_exe = b.addExecutable(.{
-        .name = "grove-incremental-bench",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/benchmarks/incremental_edit.zig"),
-            .target = target,
-            .optimize = .ReleaseFast,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    incremental_bench_exe.addIncludePath(tree_sitter_include);
-    incremental_bench_exe.addIncludePath(rust_include_path);
-    incremental_bench_exe.linkLibC();
-    const run_incremental_bench = b.addRunArtifact(incremental_bench_exe);
-    run_incremental_bench.step.dependOn(b.getInstallStep());
-
-    const incremental_bench_step = b.step("bench-incremental", "Run incremental edit latency benchmarks");
-    incremental_bench_step.dependOn(&run_incremental_bench.step);
-
-    const grim_config_exe = b.addExecutable(.{
-        .name = "grove-grim-config",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tools/grim_config_export.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    grim_config_exe.addIncludePath(tree_sitter_include);
-    grim_config_exe.addIncludePath(rust_include_path);
-    grim_config_exe.linkLibC();
-    const run_grim_config = b.addRunArtifact(grim_config_exe);
-    run_grim_config.step.dependOn(b.getInstallStep());
-    if (b.args) |tool_args| {
-        run_grim_config.addArgs(tool_args);
-    }
-
-    const grim_config_step = b.step("grim-config", "Export Grove configuration for Grim integration");
-    grim_config_step.dependOn(&run_grim_config.step);
-
-    const cross_platform_exe = b.addExecutable(.{
-        .name = "grove-cross-platform-validation",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tools/cross_platform_validation.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    cross_platform_exe.addIncludePath(tree_sitter_include);
-    cross_platform_exe.addIncludePath(rust_include_path);
-    cross_platform_exe.linkLibC();
-    const run_cross_platform = b.addRunArtifact(cross_platform_exe);
-    run_cross_platform.step.dependOn(b.getInstallStep());
-
-    const cross_platform_step = b.step("cross-platform", "Run cross-platform validation suite");
-    cross_platform_step.dependOn(&run_cross_platform.step);
-
-    const semantic_demo_exe = b.addExecutable(.{
-        .name = "grove-semantic-demo",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tools/semantic_demo.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    semantic_demo_exe.addIncludePath(tree_sitter_include);
-    semantic_demo_exe.addIncludePath(rust_include_path);
-    semantic_demo_exe.linkLibC();
-    const run_semantic_demo = b.addRunArtifact(semantic_demo_exe);
-    run_semantic_demo.step.dependOn(b.getInstallStep());
-    if (b.args) |demo_args| {
-        run_semantic_demo.addArgs(demo_args);
-    }
-
-    const semantic_demo_step = b.step("semantic-demo", "Run semantic analysis demonstration");
-    semantic_demo_step.dependOn(&run_semantic_demo.step);
-
-    const lsp_demo_exe = b.addExecutable(.{
-        .name = "grove-lsp-demo",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tools/lsp_demo.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    lsp_demo_exe.addIncludePath(tree_sitter_include);
-    lsp_demo_exe.addIncludePath(rust_include_path);
-    lsp_demo_exe.linkLibC();
-    const run_lsp_demo = b.addRunArtifact(lsp_demo_exe);
-    run_lsp_demo.step.dependOn(b.getInstallStep());
-    if (b.args) |demo_args| {
-        run_lsp_demo.addArgs(demo_args);
-    }
-
-    const lsp_demo_step = b.step("lsp-demo", "Run LSP helper demonstration");
-    lsp_demo_step.dependOn(&run_lsp_demo.step);
-
-    const fixture_lockdown_exe = b.addExecutable(.{
-        .name = "grove-fixture-lockdown",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tools/fixture_lockdown.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    fixture_lockdown_exe.addIncludePath(tree_sitter_include);
-    fixture_lockdown_exe.addIncludePath(rust_include_path);
-    fixture_lockdown_exe.linkLibC();
-    const run_fixture_lockdown = b.addRunArtifact(fixture_lockdown_exe);
-    run_fixture_lockdown.step.dependOn(b.getInstallStep());
-    if (b.args) |lockdown_args| {
-        run_fixture_lockdown.addArgs(lockdown_args);
-    }
-
-    const fixture_lockdown_step = b.step("fixture-lockdown", "Lock down parser and query fixtures");
-    fixture_lockdown_step.dependOn(&run_fixture_lockdown.step);
-
-    const bench_compare_exe = b.addExecutable(.{
-        .name = "grove-bench-compare",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tools/bench_compare.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    bench_compare_exe.addIncludePath(tree_sitter_include);
-    bench_compare_exe.addIncludePath(rust_include_path);
-    bench_compare_exe.linkLibC();
-    const run_bench_compare = b.addRunArtifact(bench_compare_exe);
-    run_bench_compare.step.dependOn(b.getInstallStep());
-    if (b.args) |bench_args| {
-        run_bench_compare.addArgs(bench_args);
-    }
-
-    const bench_compare_step = b.step("bench-compare", "Performance gate for CI/CD");
-    bench_compare_step.dependOn(&run_bench_compare.step);
-
-    const metric_dashboard_exe = b.addExecutable(.{
-        .name = "grove-metric-dashboard",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tools/metric_dashboard.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "grove", .module = mod },
-            },
-        }),
-    });
-    metric_dashboard_exe.addIncludePath(tree_sitter_include);
-    metric_dashboard_exe.addIncludePath(rust_include_path);
-    metric_dashboard_exe.linkLibC();
-    const run_metric_dashboard = b.addRunArtifact(metric_dashboard_exe);
-    run_metric_dashboard.step.dependOn(b.getInstallStep());
-    if (b.args) |dashboard_args| {
-        run_metric_dashboard.addArgs(dashboard_args);
-    }
-
-    const metric_dashboard_step = b.step("metric-dashboard", "Generate nightly metric dashboard");
-    metric_dashboard_step.dependOn(&run_metric_dashboard.step);
 
     // Just like flags, top level steps are also listed in the `--help` menu.
     //
