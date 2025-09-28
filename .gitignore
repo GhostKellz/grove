@@ -1,8 +1,10 @@
-/zig-cache/
-/zig-out/
+.zig-cache/
+zig-out/
 *.o
 *.exe
 archive/
+vendor/tree-sitter/
+vendor/tree-sitter-rust/
 TODO.md
 .zig-cache/
 ROADMAP.md
@@ -10,4 +12,5 @@ ZIG_PROJECTS.md
 CODEX.md
 GHOSTLANG_INTEGRATION.md
 ZIG_PROJECS.md
-ROADMAP.md
+ADAPTER_GUIDE.md 
+ADAPTER_BRANCH.md 

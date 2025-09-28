@@ -19,10 +19,20 @@ jobs:
 
     - name: Set up tree-sitter dependencies
       run: |
+        set -e
         mkdir -p vendor/tree-sitter/lib/include/tree_sitter vendor/tree-sitter/lib/src
 
-        # Download and extract tree-sitter v0.22.6
-        curl -L https://github.com/tree-sitter/tree-sitter/archive/v0.22.6.tar.gz | tar xz
+        # Download and extract tree-sitter v0.22.6 with timeout and retry
+        echo "Downloading tree-sitter v0.22.6..."
+        if ! curl --connect-timeout 30 --max-time 300 -L https://github.com/tree-sitter/tree-sitter/archive/v0.22.6.tar.gz -o tree-sitter-v0.22.6.tar.gz; then
+          echo "Direct download failed, trying alternative URL..."
+          curl --connect-timeout 30 --max-time 300 -L https://codeload.github.com/tree-sitter/tree-sitter/tar.gz/v0.22.6 -o tree-sitter-v0.22.6.tar.gz
+        fi
+
+        echo "Extracting tree-sitter..."
+        tar -xzf tree-sitter-v0.22.6.tar.gz
+
+        echo "Copying tree-sitter files..."
         cp -r tree-sitter-0.22.6/lib/* vendor/tree-sitter/lib/
 
         # Copy required headers to include directory
@@ -30,7 +40,9 @@ jobs:
         cp tree-sitter-0.22.6/lib/src/alloc.h vendor/tree-sitter/lib/include/tree_sitter/
 
         # Clean up downloaded files
-        rm -rf tree-sitter-0.22.6
+        rm -rf tree-sitter-0.22.6 tree-sitter-v0.22.6.tar.gz
+
+        echo "Tree-sitter dependencies setup complete"
 
     - name: Cache Zig dependencies
       uses: actions/cache@v4
