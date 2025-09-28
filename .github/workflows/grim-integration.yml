@@ -43,7 +43,7 @@ jobs:
     - name: Trigger Grim workflow
       uses: actions/github-script@v7
       with:
-        github-token: ${{ secrets.GRIM_INTEGRATION_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const grim_branch = '${{ github.event.inputs.grim_branch || 'feature/ghostlang-gza-adapter' }}';
 
@@ -67,7 +67,7 @@ jobs:
     - name: Wait for Grim tests (if triggered)
       uses: actions/github-script@v7
       with:
-        github-token: ${{ secrets.GRIM_INTEGRATION_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           // Wait up to 30 minutes for Grim tests to complete
           const maxWaitTime = 30 * 60 * 1000; // 30 minutes
