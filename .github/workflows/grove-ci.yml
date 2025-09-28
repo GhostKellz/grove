@@ -36,7 +36,7 @@ jobs:
         cp -r tree-sitter-0.22.6/lib/* vendor/tree-sitter/lib/
 
         # Copy required headers to include directory
-        cp tree-sitter-0.22.6/lib/include/tree_sitter/parser.h vendor/tree-sitter/lib/include/tree_sitter/
+        cp tree-sitter-0.22.6/lib/src/parser.h vendor/tree-sitter/lib/include/tree_sitter/
         cp tree-sitter-0.22.6/lib/src/alloc.h vendor/tree-sitter/lib/include/tree_sitter/
 
         # Clean up downloaded files
