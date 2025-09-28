@@ -14,7 +14,7 @@ pub const ParserPool = struct {
             .allocator = allocator,
             .language = language,
             .capacity = capacity,
-            .store = std.ArrayList(Parser).init(allocator),
+            .store = std.ArrayList(Parser){},
         };
     }
 
@@ -22,11 +22,12 @@ pub const ParserPool = struct {
         for (self.store.items) |*parser| {
             parser.deinit();
         }
-        self.store.deinit();
+        self.store.deinit(self.allocator);
     }
 
     pub fn acquire(self: *ParserPool) ParserError!Lease {
-        if (self.store.popOrNull()) |parser| {
+        if (self.store.items.len > 0) {
+            const parser = self.store.pop();
             return Lease{ .pool = self, .parser = parser, .released = false };
         }
 
@@ -44,7 +45,7 @@ pub const ParserPool = struct {
                 value.deinit();
                 return;
             }
-            self.store.append(value) catch {
+            self.store.append(self.allocator, value) catch {
                 value.deinit();
             };
         } else |err| {

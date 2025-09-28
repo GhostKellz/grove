@@ -2,7 +2,7 @@
 
 ## Overview
 
-This tree-sitter grammar enables Grove to provide syntax highlighting, parsing, and navigation support for Ghostlang (`.ghost`) files.
+This tree-sitter grammar enables Grove to provide syntax highlighting, parsing, and navigation support for Ghostlang (`.gza`) files.
 
 ## Features
 

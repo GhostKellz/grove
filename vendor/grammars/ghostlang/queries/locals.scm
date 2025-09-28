@@ -9,11 +9,11 @@
 ; Function definitions create their own scope
 (function_declaration
   name: (identifier) @local.definition.function
-  body: (_) @local.scope)
+  body: (_) @local.scope) @local.symbol.function
 
 ; Variable definitions
 (variable_declaration
-  name: (identifier) @local.definition.variable)
+  name: (identifier) @local.definition.variable) @local.symbol.variable
 
 ; Parameter definitions
 (parameter_list

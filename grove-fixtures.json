@@ -1,0 +1,104 @@
+{
+  "version": "1.0",
+  "generated": "1759039680",
+  "fixtures": [
+    {
+      "path": "vendor/grammars/json/parser.c",
+      "checksum": "e8e1ff5df0d73e3b82574129724e68ef4fa0faf1b8c43dd3f5c1a84839f830ab",
+      "size": 27668,
+      "language": "json",
+      "type": "parser"
+    },
+    {
+      "path": "vendor/grammars/zig/parser.c",
+      "checksum": "537d08b4473297d12045e07dc470bcd069ba2eb239ebb405f7bc755e63a12d27",
+      "size": 5140154,
+      "language": "zig",
+      "type": "parser"
+    },
+    {
+      "path": "vendor/grammars/ghostlang/parser.c",
+      "checksum": "37c16bbaa50a46da64dbe2ceb1a1396edb11c4379f46105c62e8d4f42fb4c265",
+      "size": 287608,
+      "language": "ghostlang",
+      "type": "parser"
+    },
+    {
+      "path": "vendor/grammars/typescript/parser.c",
+      "checksum": "74fe453edd70f4eae9af0a1050cbd7943d8971d59165b6aaebbaa0a0b716d1aa",
+      "size": 8745894,
+      "language": "typescript",
+      "type": "parser"
+    },
+    {
+      "path": "vendor/grammars/typescript/scanner.c",
+      "checksum": "b9fbf674cc093bae35a2c4fb6eb3b0824d1a061c2c28742ae28ecec75c660ab8",
+      "size": 570,
+      "language": "typescript",
+      "type": "parser"
+    },
+    {
+      "path": "vendor/grammars/tsx/parser.c",
+      "checksum": "1902cb53fa7ff5179df89b2eea863165e84c8cc866226419dc26921d8c055885",
+      "size": 8769870,
+      "language": "tsx",
+      "type": "parser"
+    },
+    {
+      "path": "vendor/grammars/tsx/scanner.c",
+      "checksum": "f4118d8616dde68b9aaba1344ce7099defd12eee7277aedcc78bd57d3b4f4342",
+      "size": 535,
+      "language": "tsx",
+      "type": "parser"
+    },
+    {
+      "path": "vendor/grammars/ghostlang/queries/highlights.scm",
+      "checksum": "9af50d7eecd3a93694dd02a18299006eab1ba3ed0c6cb6d9d58b18ccfc03151f",
+      "size": 1959,
+      "language": "ghostlang",
+      "type": "query_highlights"
+    },
+    {
+      "path": "vendor/grammars/ghostlang/queries/locals.scm",
+      "checksum": "07382e2bf92ea0f99bd01849d1b4c3ad26b3e32febb451f49b223ad0bbb66045",
+      "size": 1077,
+      "language": "ghostlang",
+      "type": "query_locals"
+    },
+    {
+      "path": "vendor/grammars/ghostlang/queries/textobjects.scm",
+      "checksum": "e0bb84b8ecf4e46f5feefbd8421983c2f1cc6d13e6273d0aa9ea08b48eba372c",
+      "size": 1403,
+      "language": "ghostlang",
+      "type": "query_textobjects"
+    },
+    {
+      "path": "vendor/grammars/typescript/queries/highlights.scm",
+      "checksum": "e0c35adb819127bfd4f853fac5419e7d8ba44760246201d04a4a5ce0228a10c5",
+      "size": 515,
+      "language": "typescript",
+      "type": "query_highlights"
+    },
+    {
+      "path": "vendor/grammars/typescript/queries/locals.scm",
+      "checksum": "c3680f9b56276fb2ccc9f1d5f4d03dbca5d64bdf3e6d52ce5a4ad342cec162d5",
+      "size": 104,
+      "language": "typescript",
+      "type": "query_locals"
+    },
+    {
+      "path": "vendor/grammars/tsx/queries/highlights.scm",
+      "checksum": "e0c35adb819127bfd4f853fac5419e7d8ba44760246201d04a4a5ce0228a10c5",
+      "size": 515,
+      "language": "tsx",
+      "type": "query_highlights"
+    },
+    {
+      "path": "vendor/grammars/tsx/queries/locals.scm",
+      "checksum": "c3680f9b56276fb2ccc9f1d5f4d03dbca5d64bdf3e6d52ce5a4ad342cec162d5",
+      "size": 104,
+      "language": "tsx",
+      "type": "query_locals"
+    }
+  ]
+}

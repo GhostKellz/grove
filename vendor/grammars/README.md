@@ -9,6 +9,8 @@ We ship pre-generated Tree-sitter grammars to keep Grove builds deterministic an
 | JSON | [tree-sitter/tree-sitter-json](https://github.com/tree-sitter/tree-sitter-json) | master (retrieved 2024-09-24) |
 | Zig | [maxxnino/tree-sitter-zig](https://github.com/maxxnino/tree-sitter-zig) | a80a6e9 (2024-10-13) |
 | Ghostlang | [ghostlang/tree-sitter-ghostlang](https://github.com/ghostlang/tree-sitter-ghostlang) | v0.1.0 (vendored 2025-09-24, local precedence fixes) |
+| TypeScript | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master (retrieved 2025-09-27) |
+| TSX | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master (retrieved 2025-09-27) |
 
 > **Note:** We will pin specific tagged releases as we evaluate stability. JSON is temporarily tracking the `master` branch until we validate a pinned tag (target: v0.20.0 or newer).
 

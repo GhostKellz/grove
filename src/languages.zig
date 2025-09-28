@@ -6,12 +6,16 @@ extern fn tree_sitter_json() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_zig() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_rust() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_ghostlang() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_typescript() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_tsx() callconv(.c) *const c.TSLanguage;
 
 pub const Bundled = enum {
     json,
     zig,
     rust,
     ghostlang,
+    typescript,
+    tsx,
 
     pub fn raw(self: Bundled) *const c.TSLanguage {
         return switch (self) {
@@ -19,6 +23,8 @@ pub const Bundled = enum {
             .zig => tree_sitter_zig(),
             .rust => tree_sitter_rust(),
             .ghostlang => tree_sitter_ghostlang(),
+            .typescript => tree_sitter_typescript(),
+            .tsx => tree_sitter_tsx(),
         };
     }
 
@@ -61,6 +67,8 @@ pub const Registry = struct {
         try self.register("zig", try Bundled.zig.get());
         try self.register("rust", try Bundled.rust.get());
         try self.register("ghostlang", try Bundled.ghostlang.get());
+        try self.register("typescript", try Bundled.typescript.get());
+        try self.register("tsx", try Bundled.tsx.get());
     }
 
     pub fn registerSharedLibrary(
@@ -99,6 +107,17 @@ test "bundled Ghostlang language returns non-null pointer" {
     try std.testing.expect(lang.raw() != null);
 }
 
+test "bundled TypeScript language returns non-null pointer" {
+    const lang = try Bundled.typescript.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled TSX language returns non-null pointer" {
+    const lang = try Bundled.tsx.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+
 test "registry can register bundled languages" {
     var registry = Registry.init(std.testing.allocator);
     defer registry.deinit();
@@ -108,4 +127,6 @@ test "registry can register bundled languages" {
     try std.testing.expect(registry.get("zig") != null);
     try std.testing.expect(registry.get("rust") != null);
     try std.testing.expect(registry.get("ghostlang") != null);
+    try std.testing.expect(registry.get("typescript") != null);
+    try std.testing.expect(registry.get("tsx") != null);
 }

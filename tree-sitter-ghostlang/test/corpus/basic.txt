@@ -54,12 +54,12 @@ function greet(name) {
                               (unary_expression
                                 (postfix_expression
                                   (primary_expression
-                                    (string_literal))))))
-                          (multiplicative_expression
-                            (unary_expression
-                              (postfix_expression
-                                (primary_expression
-                                  (identifier))))))))))))))))))
+                                    (string_literal)))))
+                            (multiplicative_expression
+                              (unary_expression
+                                (postfix_expression
+                                  (primary_expression
+                                    (identifier)))))))))))))))))))
 
 ====================================
 If statement
@@ -125,7 +125,7 @@ if (x > 0) {
                                                       (unary_expression
                                                         (postfix_expression
                                                           (primary_expression
-                                                            (string_literal))))))))))))))))))))))))))))
+                                                            (string_literal))))))))))))))))))))))))))
       else: (statement
         (block_statement
           (statement
@@ -156,7 +156,7 @@ if (x > 0) {
                                                       (unary_expression
                                                         (postfix_expression
                                                           (primary_expression
-                                                            (string_literal)))))))))))))))))))))))))))))))
+                                                            (string_literal)))))))))))))))))))))))))))))
 
 ====================================
 Editor API calls
@@ -226,7 +226,7 @@ setLineText(line, "New content");
                                               (unary_expression
                                                 (postfix_expression
                                                   (primary_expression
-                                                    (string_literal)))))))))))))))))))))))))))
+                                                    (string_literal))))))))))))))))))))))))))))
 
 ====================================
 Object literal
@@ -297,7 +297,7 @@ var config = {
                                                 (unary_expression
                                                   (postfix_expression
                                                     (primary_expression
-                                                      (boolean_literal))))))))))))))))))))))))))))
+                                                      (boolean_literal))))))))))))))))))))))))))
 
 ====================================
 Array literal and loops
@@ -361,7 +361,7 @@ for (var item in items) {
                                               (unary_expression
                                                 (postfix_expression
                                                   (primary_expression
-                                                    (number_literal))))))))))))))))))))))))))
+                                                    (number_literal)))))))))))))))))))))))))
   (statement
     (for_statement
       variable: (identifier)
@@ -407,7 +407,7 @@ for (var item in items) {
                                                       (unary_expression
                                                         (postfix_expression
                                                           (primary_expression
-                                                            (identifier)))))))))))))))))))))))))))))))
+                                                            (identifier)))))))))))))))))))))))))))))
 
 ====================================
 Comments
@@ -444,4 +444,4 @@ function test() {
                             (unary_expression
                               (postfix_expression
                                 (primary_expression
-                                  (number_literal))))))))))))))))))
+                                  (number_literal)))))))))))))))))))

@@ -24,7 +24,7 @@ pub const Query = struct {
     pub fn init(allocator: std.mem.Allocator, language: Language, source: []const u8) QueryError!Query {
         var error_offset: u32 = undefined;
         var error_type: c.TSQueryError = undefined;
-        const length = std.math.cast(u32, source.len) catch return QueryError.AllocationFailed;
+        const length = std.math.cast(u32, source.len) orelse return QueryError.AllocationFailed;
         const ptr = c.ts_query_new(
             language.raw(),
             source.ptr,
@@ -139,7 +139,7 @@ pub const QueryCursor = struct {
         var match_obj: c.TSQueryMatch = undefined;
         var capture_index: u32 = undefined;
         const has_next = c.ts_query_cursor_next_capture(self.must(), &match_obj, &capture_index);
-        if (has_next == 0) return null;
+        if (!has_next) return null;
 
         const captures_ptr: [*]const c.TSQueryCapture = @ptrCast(match_obj.captures);
         const capture = captures_ptr[capture_index];

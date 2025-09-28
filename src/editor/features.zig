@@ -31,17 +31,20 @@ pub const FoldingOptions = struct {
     max_ranges: ?usize = null,
 };
 
+pub const FoldingQueryError = QueryModule.CursorError || std.mem.Allocator.Error;
+
 pub fn collectFoldingRanges(
     allocator: std.mem.Allocator,
     root: Node,
     options: FoldingOptions,
 ) std.mem.Allocator.Error![]FoldingRange {
-    var result = std.ArrayList(FoldingRange).init(allocator);
+    var result = std.ArrayList(FoldingRange){};
     errdefer result.deinit();
 
-    var stack = std.ArrayList(Node).init(allocator);
+    var stack = std.ArrayList(Node){};
+    defer stack.deinit(allocator);
     defer stack.deinit();
-    try stack.append(root);
+    try stack.append(allocator, root);
 
     while (stack.popOrNull()) |node| {
         const start = node.startPosition();
@@ -54,7 +57,7 @@ pub fn collectFoldingRanges(
                 .end_character = end.column,
                 .kind = null,
             };
-            try result.append(range);
+            try result.append(allocator, range);
             if (options.max_ranges) |limit| {
                 if (result.items.len >= limit) break;
             }
@@ -64,12 +67,56 @@ pub fn collectFoldingRanges(
         while (remaining > 0) {
             remaining -= 1;
             if (node.child(remaining)) |child| {
-                try stack.append(child);
+                try stack.append(allocator, child);
             }
         }
     }
 
-    return result.toOwnedSlice();
+    return result.toOwnedSlice(allocator);
+}
+
+pub fn collectFoldingRangesFromQuery(
+    allocator: std.mem.Allocator,
+    query: *Query,
+    root: Node,
+    capture_filter: []const []const u8,
+    options: FoldingOptions,
+) FoldingQueryError![]FoldingRange {
+    var cursor = try QueryCursor.init();
+    defer cursor.deinit();
+    cursor.exec(query, root);
+
+    var result = std.ArrayList(FoldingRange){};
+    errdefer result.deinit();
+
+    if (capture_filter.len == 0) return result.toOwnedSlice(allocator);
+
+    while (cursor.nextCapture(query)) |hit| {
+        if (!captureMatches(hit.capture.name, capture_filter)) continue;
+
+        const node = hit.capture.node;
+        const start = node.startPosition();
+        const end = node.endPosition();
+
+        if (end.row <= start.row) continue;
+        if ((end.row - start.row) < options.min_line_span) continue;
+
+        const range = FoldingRange{
+            .start_line = start.row,
+            .start_character = start.column,
+            .end_line = end.row,
+            .end_character = end.column,
+            .kind = null,
+        };
+
+        try result.append(range);
+
+        if (options.max_ranges) |limit| {
+            if (result.items.len >= limit) break;
+        }
+    }
+
+    return result.toOwnedSlice(allocator);
 }
 
 pub const SymbolKind = enum(u8) {
@@ -121,13 +168,13 @@ pub fn collectDocumentSymbols(
     defer cursor.deinit();
     cursor.exec(query, root);
 
-    var symbols = std.ArrayList(DocumentSymbol).init(allocator);
+    var symbols = std.ArrayList(DocumentSymbol){};
     errdefer {
         deinitSymbolList(allocator, symbols.items);
         symbols.deinit();
     }
 
-    if (rules.len == 0) return symbols.toOwnedSlice();
+    if (rules.len == 0) return symbols.toOwnedSlice(allocator);
 
     const Accumulator = struct {
         rule_index: ?usize = null,
@@ -195,7 +242,7 @@ pub fn collectDocumentSymbols(
                             detail_node,
                             source,
                         );
-                        try symbols.append(symbol);
+                        try symbols.append(allocator, symbol);
                     }
                 }
             }
@@ -203,7 +250,7 @@ pub fn collectDocumentSymbols(
         }
     }
 
-    return symbols.toOwnedSlice();
+    return symbols.toOwnedSlice(allocator);
 }
 
 pub fn freeDocumentSymbols(allocator: std.mem.Allocator, symbols: []DocumentSymbol) void {
@@ -330,6 +377,13 @@ fn sliceNode(source: []const u8, node: Node) []const u8 {
         return &[_]u8{};
     }
     return source[start..end];
+}
+
+fn captureMatches(name: []const u8, filter: []const []const u8) bool {
+    for (filter) |candidate| {
+        if (std.mem.eql(u8, candidate, name)) return true;
+    }
+    return false;
 }
 
 const testing = std.testing;

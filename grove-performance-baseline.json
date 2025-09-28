@@ -1,0 +1,41 @@
+{
+  "version": "RC1",
+  "created": 1759039635,
+  "benchmarks": [
+    {
+      "name": "TypeScript Large",
+      "throughput_mbps": 1.2157842962181324,
+      "latency_ms": 0.85736099,
+      "memory_mb": 0,
+      "timestamp": 1759039635
+    },
+    {
+      "name": "Zig Large",
+      "throughput_mbps": 1.3870193805386113,
+      "latency_ms": 0.95984913,
+      "memory_mb": 0,
+      "timestamp": 1759039635
+    },
+    {
+      "name": "JSON Medium",
+      "throughput_mbps": 2.0794456145273315,
+      "latency_ms": 0.39762311000000006,
+      "memory_mb": 0,
+      "timestamp": 1759039635
+    },
+    {
+      "name": "TypeScript Incremental",
+      "throughput_mbps": 8.865541855708653,
+      "latency_ms": 0.003227127,
+      "memory_mb": 0,
+      "timestamp": 1759039635
+    },
+    {
+      "name": "Zig Incremental",
+      "throughput_mbps": 0.765325574998389,
+      "latency_ms": 0.037383083,
+      "memory_mb": 0,
+      "timestamp": 1759039635
+    }
+  ]
+}

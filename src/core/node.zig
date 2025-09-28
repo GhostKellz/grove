@@ -52,7 +52,7 @@ pub const Node = struct {
 
     pub fn child(self: Node, index: u32) ?Node {
         const child_node = c.ts_node_child(self.handle, index);
-        if (c.ts_node_is_null(child_node) != 0) return null;
+        if (c.ts_node_is_null(child_node)) return null;
         return Node.fromRaw(child_node);
     }
 
@@ -63,5 +63,26 @@ pub const Node = struct {
         const buffer = try allocator.alloc(u8, view.len);
         std.mem.copyForwards(u8, buffer, view);
         return buffer;
+    }
+
+    pub fn containsPoint(self: Node, point: Point) bool {
+        const start = self.startPosition();
+        const end = self.endPosition();
+
+        if (point.row < start.row or point.row > end.row) return false;
+        if (point.row == start.row and point.column < start.column) return false;
+        if (point.row == end.row and point.column > end.column) return false;
+
+        return true;
+    }
+
+    pub fn eql(self: Node, other: Node) bool {
+        return c.ts_node_eq(self.handle, other.handle);
+    }
+
+    pub fn parent(self: Node) ?Node {
+        const parent_node = c.ts_node_parent(self.handle);
+        if (c.ts_node_is_null(parent_node)) return null;
+        return Node.fromRaw(parent_node);
     }
 };

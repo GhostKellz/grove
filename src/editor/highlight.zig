@@ -85,13 +85,12 @@ fn collectWithCursor(
     cursor: *QueryCursor,
     rules: []const HighlightRule,
 ) HighlightError![]HighlightSpan {
-    var list = std.ArrayList(HighlightSpan).init(allocator);
-    defer list.deinit();
+    var list = std.ArrayList(HighlightSpan){};
 
     while (cursor.nextCapture(query)) |result| {
         const highlight_class = resolveClass(result.capture.name, rules);
         const node = result.capture.node;
-        try list.append(.{
+        try list.append(allocator, .{
             .class = highlight_class,
             .capture = result.capture.name,
             .start_byte = node.startByte(),
@@ -101,7 +100,7 @@ fn collectWithCursor(
         });
     }
 
-    return list.toOwnedSlice();
+    return list.toOwnedSlice(allocator);
 }
 
 fn resolveClass(name: []const u8, rules: []const HighlightRule) []const u8 {
@@ -159,6 +158,8 @@ const highlight_query_source =
     \\(pair key: (string) @property value: [(string) (true) (false) (null)] @value)
 ;
 const ghost_highlight_query_source = @embedFile("../../vendor/grammars/ghostlang/queries/highlights.scm");
+const typescript_highlight_query_source = @embedFile("../../vendor/grammars/typescript/queries/highlights.scm");
+const tsx_highlight_query_source = @embedFile("../../vendor/grammars/tsx/queries/highlights.scm");
 
 test "collectHighlights maps captures to highlight classes" {
     const allocator = testing.allocator;
@@ -247,6 +248,87 @@ test "ghostlang highlight engine loads vendored queries" {
         \\}
         \\var data = { count: 1 };
         \\data.count = data.count + 1;
+    ;
+
+    var tree = try parser.parseUtf8(null, source);
+    defer tree.deinit();
+
+    const root = tree.rootNode() orelse return error.MissingRoot;
+    const spans = try engine.highlight(root);
+    defer allocator.free(spans);
+
+    try testing.expect(spans.len > 0);
+}
+
+test "typescript highlight engine loads vendored queries" {
+    const allocator = testing.allocator;
+    const lang = try Languages.typescript.get();
+
+    const rules = [_]HighlightRule{
+        .{ .capture = "type", .class = "@type" },
+        .{ .capture = "type.builtin", .class = "@type.builtin" },
+        .{ .capture = "keyword", .class = "@keyword" },
+        .{ .capture = "function", .class = "@function" },
+        .{ .capture = "variable.parameter", .class = "@variable.parameter" },
+        .{ .capture = "punctuation.bracket", .class = "@punctuation.bracket" },
+        .{ .capture = "string", .class = "@string" },
+        .{ .capture = "number", .class = "@number" },
+    };
+
+    var engine = try HighlightEngine.init(allocator, lang, typescript_highlight_query_source, rules);
+    defer engine.deinit();
+
+    var parser = try Parser.init(allocator);
+    defer parser.deinit();
+    try parser.setLanguage(lang);
+
+    const source =
+        \\function greet(name: string): string {
+        \\  return "Hello, " + name;
+        \\}
+        \\
+        \\const result: number = 42;
+    ;
+
+    var tree = try parser.parseUtf8(null, source);
+    defer tree.deinit();
+
+    const root = tree.rootNode() orelse return error.MissingRoot;
+    const spans = try engine.highlight(root);
+    defer allocator.free(spans);
+
+    try testing.expect(spans.len > 0);
+}
+
+test "tsx highlight engine loads vendored queries" {
+    const allocator = testing.allocator;
+    const lang = try Languages.tsx.get();
+
+    const rules = [_]HighlightRule{
+        .{ .capture = "type", .class = "@type" },
+        .{ .capture = "type.builtin", .class = "@type.builtin" },
+        .{ .capture = "keyword", .class = "@keyword" },
+        .{ .capture = "function", .class = "@function" },
+        .{ .capture = "variable.parameter", .class = "@variable.parameter" },
+        .{ .capture = "tag", .class = "@tag" },
+        .{ .capture = "attribute", .class = "@attribute" },
+        .{ .capture = "string", .class = "@string" },
+        .{ .capture = "number", .class = "@number" },
+    };
+
+    var engine = try HighlightEngine.init(allocator, lang, tsx_highlight_query_source, rules);
+    defer engine.deinit();
+
+    var parser = try Parser.init(allocator);
+    defer parser.deinit();
+    try parser.setLanguage(lang);
+
+    const source =
+        \\function Component(props: { name: string }) {
+        \\  return <div>Hello, {props.name}</div>;
+        \\}
+        \\
+        \\const element = <Component name="World" />;
     ;
 
     var tree = try parser.parseUtf8(null, source);
