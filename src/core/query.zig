@@ -162,6 +162,85 @@ fn toTSPoint(point: Point) c.TSPoint {
     return .{ .row = point.row, .column = point.column };
 }
 
+/// Validation result for query syntax
+pub const ValidationResult = struct {
+    valid: bool,
+    error_offset: u32,
+    error_type: QueryError,
+    error_message: []const u8,
+
+    pub fn ok() ValidationResult {
+        return .{
+            .valid = true,
+            .error_offset = 0,
+            .error_type = QueryError.AllocationFailed, // placeholder, won't be used
+            .error_message = "",
+        };
+    }
+
+    pub fn err(offset: u32, err_type: QueryError, message: []const u8) ValidationResult {
+        return .{
+            .valid = false,
+            .error_offset = offset,
+            .error_type = err_type,
+            .error_message = message,
+        };
+    }
+};
+
+/// Validate a query string without creating a Query object
+pub fn validateQuery(language: Language, source: []const u8) ValidationResult {
+    var error_offset: u32 = 0;
+    var error_type: c.TSQueryError = c.TSQueryErrorNone;
+    const length = std.math.cast(u32, source.len) orelse {
+        return ValidationResult.err(0, QueryError.AllocationFailed, "Query too large");
+    };
+
+    const ptr = c.ts_query_new(
+        language.raw(),
+        source.ptr,
+        length,
+        &error_offset,
+        &error_type,
+    );
+
+    if (ptr == null) {
+        const err = switch (error_type) {
+            c.TSQueryErrorSyntax => QueryError.Syntax,
+            c.TSQueryErrorNodeType => QueryError.NodeType,
+            c.TSQueryErrorField => QueryError.Field,
+            c.TSQueryErrorCapture => QueryError.Capture,
+            c.TSQueryErrorStructure => QueryError.Structure,
+            c.TSQueryErrorLanguage => QueryError.LanguageMismatch,
+            else => QueryError.AllocationFailed,
+        };
+        const msg = switch (err) {
+            QueryError.Syntax => "Syntax error in query",
+            QueryError.NodeType => "Invalid node type",
+            QueryError.Field => "Invalid field name",
+            QueryError.Capture => "Invalid capture name",
+            QueryError.Structure => "Invalid query structure",
+            QueryError.LanguageMismatch => "Query language mismatch",
+            else => "Unknown error",
+        };
+        return ValidationResult.err(error_offset, err, msg);
+    }
+
+    c.ts_query_delete(ptr);
+    return ValidationResult.ok();
+}
+
+/// Validate a query file (.scm) without creating a Query object
+pub fn validateQueryFile(allocator: std.mem.Allocator, language: Language, path: []const u8) !ValidationResult {
+    const file = try std.fs.cwd().openFile(path, .{});
+    defer file.close();
+
+    const source = try file.readToEndAlloc(allocator, 1024 * 1024); // 1MB max
+    defer allocator.free(source);
+
+    return validateQuery(language, source);
+}
+
 const testing = std.testing;
 const Languages = @import("../languages.zig").Bundled;
 const Parser = @import("parser.zig").Parser;

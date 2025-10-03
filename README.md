@@ -167,8 +167,12 @@ pub fn main() !void {
 ## Editor Toolkit
 
 - **Queries**: `grove.Query` and `grove.QueryCursor` wrap Tree-sitter query APIs with Zig safety, capture metadata, and dynamic registry support.
+- **Query Validation**: `grove.validateQuery` and `grove.validateQueryFile` check .scm files for errors before runtime.
 - **Highlights**: `grove.Highlight.collectHighlights` and `HighlightEngine` map captures to Grim highlight classes.
 - **Editor Utilities**: `grove.Editor` exposes `getHighlights`, `getFoldingRanges`, `getDocumentSymbols`, `findDefinition`, and `hover` helpers for LSP plumbing.
+- **Error Recovery**: `grove.getSyntaxErrors` extracts ERROR and MISSING nodes with context for diagnostics.
+- **Incremental Edits**: `grove.EditBuilder` provides high-level helpers for insertText, deleteRange, and replaceRange operations.
+- **Multi-Grammar Support**: `grove.parseWithInjections` handles embedded languages (e.g., code blocks in Markdown, scripts in HTML).
 - **Dynamic Grammars**: `grove.LanguageRegistry` registers additional grammars from shared libraries for live grammar swaps.
 
 ## Performance Helpers
@@ -176,6 +180,7 @@ pub fn main() !void {
 - **Chunked Input**: `Parser.parseChunks` feeds rope segments or streaming buffers directly into Tree-sitter without concatenation.
 - **Timing & Benchmarks**: `Parser.parseUtf8Timed` returns `ParseReport { tree, duration_ns, bytes }` for profiling. `zig build bench` parses bundled Zig sources and prints throughput, while `zig build bench-latency` samples incremental edits.
 - **Parser Pooling**: `grove.ParserPool` leases configured parsers across threads, eliminating hot-path reinitialisation overhead.
+- **Tree Cloning**: `tree.clone()` creates fast tree copies for undo/redo stacks without re-parsing.
 
 ## License
 
