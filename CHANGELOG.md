@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-10-03
+
+### Fixed
+- **Rust grammar now packaged correctly** - Added `vendor/tree-sitter-rust` to `build.zig.zon` `.paths` so Grim and other consumers receive the Rust parser/scanner files when fetching Grove as a dependency
+- Resolved build failures in downstream projects attempting to compile with Rust language support
+
 ## [0.1.0] - 2025-10-03
 
 ### 🎉 First Official Release - Grim Integration Ready
