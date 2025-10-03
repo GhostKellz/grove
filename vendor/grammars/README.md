@@ -1,18 +1,30 @@
 # Vendored Tree-sitter Grammars
 
-We ship pre-generated Tree-sitter grammars to keep Grove builds deterministic and CI-friendly.
+We ship pre-generated Tree-sitter grammars to keep Grove builds deterministic and CI-friendly. All grammars are compiled against **tree-sitter 0.25.10** (ABI version 15).
 
 ## Grammar Versions
 
-| Language | Source Repository | Version / Commit |
-| --- | --- | --- |
-| JSON | [tree-sitter/tree-sitter-json](https://github.com/tree-sitter/tree-sitter-json) | master (retrieved 2024-09-24) |
-| Zig | [maxxnino/tree-sitter-zig](https://github.com/maxxnino/tree-sitter-zig) | a80a6e9 (2024-10-13) |
-| Ghostlang | [ghostlang/tree-sitter-ghostlang](https://github.com/ghostlang/tree-sitter-ghostlang) | v0.1.0 (vendored 2025-09-24, local precedence fixes) |
-| TypeScript | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master (retrieved 2025-09-27) |
-| TSX | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master (retrieved 2025-09-27) |
+| Language | Source Repository | Version / Commit | Generated |
+| --- | --- | --- | --- |
+| JSON | [tree-sitter/tree-sitter-json](https://github.com/tree-sitter/tree-sitter-json) | master | 2025-10-03 |
+| Zig | [maxxnino/tree-sitter-zig](https://github.com/maxxnino/tree-sitter-zig) | master | 2025-10-03 |
+| Rust | [tree-sitter/tree-sitter-rust](https://github.com/tree-sitter/tree-sitter-rust) | master | 2025-10-03 |
+| Ghostlang | [ghostlang/tree-sitter-ghostlang](https://github.com/ghostlang/tree-sitter-ghostlang) | archive/2025-10-03 | 2025-10-03 |
+| TypeScript | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master | 2025-10-03 |
+| TSX | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master | 2025-10-03 |
+| Bash | [tree-sitter/tree-sitter-bash](https://github.com/tree-sitter/tree-sitter-bash) | master | 2025-10-03 |
+| JavaScript | [tree-sitter/tree-sitter-javascript](https://github.com/tree-sitter/tree-sitter-javascript) | master | 2025-10-03 |
+| Python | [tree-sitter/tree-sitter-python](https://github.com/tree-sitter/tree-sitter-python) | master | 2025-10-03 |
+| Markdown | [tree-sitter-grammars/tree-sitter-markdown](https://github.com/tree-sitter-grammars/tree-sitter-markdown) | master | 2025-10-03 |
+| CMake | [uyha/tree-sitter-cmake](https://github.com/uyha/tree-sitter-cmake) | master | 2025-10-03 |
+| TOML | [tree-sitter-grammars/tree-sitter-toml](https://github.com/tree-sitter-grammars/tree-sitter-toml) | master | 2025-10-03 |
+| YAML | [tree-sitter-grammars/tree-sitter-yaml](https://github.com/tree-sitter-grammars/tree-sitter-yaml) | master | 2025-10-03 |
+| C | [tree-sitter/tree-sitter-c](https://github.com/tree-sitter/tree-sitter-c) | master | 2025-10-03 |
 
-> **Note:** We will pin specific tagged releases as we evaluate stability. JSON is temporarily tracking the `master` branch until we validate a pinned tag (target: v0.20.0 or newer).
+## Tree-sitter Version
+
+**Current:** tree-sitter 0.25.10 (ABI version 15)
+**Upgraded:** 2025-10-03
 
 ## Update Process
 

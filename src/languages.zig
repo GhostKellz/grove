@@ -8,6 +8,14 @@ extern fn tree_sitter_rust() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_ghostlang() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_typescript() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_tsx() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_bash() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_javascript() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_python() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_markdown() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_cmake() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_toml() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_yaml() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_c() callconv(.c) *const c.TSLanguage;
 
 pub const Bundled = enum {
     json,
@@ -16,6 +24,14 @@ pub const Bundled = enum {
     ghostlang,
     typescript,
     tsx,
+    bash,
+    javascript,
+    python,
+    markdown,
+    cmake,
+    toml,
+    yaml,
+    c,
 
     pub fn raw(self: Bundled) *const c.TSLanguage {
         return switch (self) {
@@ -25,6 +41,14 @@ pub const Bundled = enum {
             .ghostlang => tree_sitter_ghostlang(),
             .typescript => tree_sitter_typescript(),
             .tsx => tree_sitter_tsx(),
+            .bash => tree_sitter_bash(),
+            .javascript => tree_sitter_javascript(),
+            .python => tree_sitter_python(),
+            .markdown => tree_sitter_markdown(),
+            .cmake => tree_sitter_cmake(),
+            .toml => tree_sitter_toml(),
+            .yaml => tree_sitter_yaml(),
+            .c => tree_sitter_c(),
         };
     }
 
@@ -38,7 +62,6 @@ pub const Bundled = enum {
 const std = @import("std");
 
 pub const DynamicLoadError = LanguageError || std.DynLib.OpenError || error{SymbolNotFound};
-
 pub const Registry = struct {
     allocator: std.mem.Allocator,
     map: std.StringArrayHashMap(Language),
@@ -69,6 +92,14 @@ pub const Registry = struct {
         try self.register("ghostlang", try Bundled.ghostlang.get());
         try self.register("typescript", try Bundled.typescript.get());
         try self.register("tsx", try Bundled.tsx.get());
+        try self.register("bash", try Bundled.bash.get());
+        try self.register("javascript", try Bundled.javascript.get());
+        try self.register("python", try Bundled.python.get());
+        try self.register("markdown", try Bundled.markdown.get());
+        try self.register("cmake", try Bundled.cmake.get());
+        try self.register("toml", try Bundled.toml.get());
+        try self.register("yaml", try Bundled.yaml.get());
+        try self.register("c", try Bundled.c.get());
     }
 
     pub fn registerSharedLibrary(
@@ -117,6 +148,45 @@ test "bundled TSX language returns non-null pointer" {
     try std.testing.expect(lang.raw() != null);
 }
 
+test "bundled Bash language returns non-null pointer" {
+    const lang = try Bundled.bash.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled JavaScript language returns non-null pointer" {
+    const lang = try Bundled.javascript.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled Python language returns non-null pointer" {
+    const lang = try Bundled.python.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled Markdown language returns non-null pointer" {
+    const lang = try Bundled.markdown.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled CMake language returns non-null pointer" {
+    const lang = try Bundled.cmake.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled TOML language returns non-null pointer" {
+    const lang = try Bundled.toml.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled YAML language returns non-null pointer" {
+    const lang = try Bundled.yaml.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
+test "bundled C language returns non-null pointer" {
+    const lang = try Bundled.c.get();
+    try std.testing.expect(lang.raw() != null);
+}
 
 test "registry can register bundled languages" {
     var registry = Registry.init(std.testing.allocator);
@@ -129,4 +199,12 @@ test "registry can register bundled languages" {
     try std.testing.expect(registry.get("ghostlang") != null);
     try std.testing.expect(registry.get("typescript") != null);
     try std.testing.expect(registry.get("tsx") != null);
+    try std.testing.expect(registry.get("bash") != null);
+    try std.testing.expect(registry.get("javascript") != null);
+    try std.testing.expect(registry.get("python") != null);
+    try std.testing.expect(registry.get("markdown") != null);
+    try std.testing.expect(registry.get("cmake") != null);
+    try std.testing.expect(registry.get("toml") != null);
+    try std.testing.expect(registry.get("yaml") != null);
+    try std.testing.expect(registry.get("c") != null);
 }

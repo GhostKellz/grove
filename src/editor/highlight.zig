@@ -258,6 +258,20 @@ test "ghostlang highlight engine loads vendored queries" {
     defer allocator.free(spans);
 
     try testing.expect(spans.len > 0);
+
+    var has_keyword = false;
+    var has_function = false;
+    var has_number = false;
+
+    for (spans) |span| {
+        if (std.mem.eql(u8, span.capture, "keyword")) has_keyword = true;
+        if (std.mem.eql(u8, span.capture, "function")) has_function = true;
+        if (std.mem.eql(u8, span.capture, "number")) has_number = true;
+    }
+
+    try testing.expect(has_keyword);
+    try testing.expect(has_function);
+    try testing.expect(has_number);
 }
 
 test "typescript highlight engine loads vendored queries" {

@@ -70,9 +70,7 @@ fn createBaseline(allocator: std.mem.Allocator) !void {
 
     std.debug.print("✅ Baseline created with {d} benchmarks\n", .{results.len});
     for (results) |result| {
-        std.debug.print("  {s}: {d:.2} MB/s, {d:.3} ms latency\n", .{
-            result.name, result.throughput_mbps, result.latency_ms
-        });
+        std.debug.print("  {s}: {d:.2} MB/s, {d:.3} ms latency\n", .{ result.name, result.throughput_mbps, result.latency_ms });
     }
 }
 
@@ -115,9 +113,7 @@ fn comparePerformance(allocator: std.mem.Allocator, threshold_percent: f64) !voi
     for (current_results) |current| {
         const baseline_result = findBenchmark(baseline.benchmarks, current.name);
         if (baseline_result == null) {
-            std.debug.print("{s: <25} {s: <12} {d: <12.2} {s: <12}\n", .{
-                current.name, "NEW", current.throughput_mbps, "N/A"
-            });
+            std.debug.print("{s: <25} {s: <12} {d: <12.2} {s: <12}\n", .{ current.name, "NEW", current.throughput_mbps, "N/A" });
             continue;
         }
 
@@ -133,9 +129,7 @@ fn comparePerformance(allocator: std.mem.Allocator, threshold_percent: f64) !voi
 
         const status = if (change_percent < -threshold_percent) "🔴" else if (change_percent > 5.0) "🟢" else "⚪";
 
-        std.debug.print("{s} {s: <23} {d: <12.2} {d: <12.2} {s: <12}\n", .{
-            status, current.name, baseline_throughput, current_throughput, change_str
-        });
+        std.debug.print("{s} {s: <23} {d: <12.2} {d: <12.2} {s: <12}\n", .{ status, current.name, baseline_throughput, current_throughput, change_str });
 
         if (change_percent < -threshold_percent) {
             regressions_found = true;
@@ -148,9 +142,7 @@ fn comparePerformance(allocator: std.mem.Allocator, threshold_percent: f64) !voi
     for (baseline.benchmarks) |baseline_bench| {
         const current_result = findBenchmark(current_results, baseline_bench.name);
         if (current_result == null) {
-            std.debug.print("⚠️  {s: <25} {d: <12.2} {s: <12} {s: <12}\n", .{
-                baseline_bench.name, baseline_bench.throughput_mbps, "MISSING", "REMOVED"
-            });
+            std.debug.print("⚠️  {s: <25} {d: <12.2} {s: <12} {s: <12}\n", .{ baseline_bench.name, baseline_bench.throughput_mbps, "MISSING", "REMOVED" });
             regressions_found = true;
         }
     }
@@ -219,8 +211,7 @@ fn runBenchmarks(allocator: std.mem.Allocator) ![]BenchmarkResult {
     try results.append(allocator, try benchmarkThroughput(allocator, "TypeScript Large", getTypeScriptLargeSource()));
     try results.append(allocator, try benchmarkThroughput(allocator, "Zig Large", getZigLargeSource()));
     try results.append(allocator, try benchmarkThroughput(allocator, "JSON Medium", getJsonMediumSource()));
-    // Rust not available yet
-    // try results.append(allocator, try benchmarkThroughput(allocator, "Rust Medium", getRustMediumSource()));
+    try results.append(allocator, try benchmarkThroughput(allocator, "Rust Medium", getRustMediumSource()));
 
     // Incremental parsing benchmarks
     try results.append(allocator, try benchmarkIncremental(allocator, "TypeScript Incremental"));
@@ -475,7 +466,7 @@ fn parseBaselineJson(allocator: std.mem.Allocator, content: []const u8) !Perform
         const entry_start = std.mem.indexOfPos(u8, benchmarks_content, pos, "{") orelse break;
         const entry_end = std.mem.indexOfPos(u8, benchmarks_content, entry_start, "}") orelse break;
 
-        const entry_content = benchmarks_content[entry_start..entry_end + 1];
+        const entry_content = benchmarks_content[entry_start .. entry_end + 1];
 
         const name = try extractJsonString(allocator, entry_content, "name");
         const throughput = try extractJsonFloat(entry_content, "throughput_mbps");
@@ -544,243 +535,243 @@ fn extractJsonFloat(json: []const u8, key: []const u8) !f64 {
 
 // Sample source code for benchmarks
 fn getTypeScriptLargeSource() []const u8 {
-    return
-        \\interface Calculator {
-        \\  value: number;
-        \\  add(x: number): number;
-        \\  multiply(x: number): number;
-        \\  divide(x: number): number;
-        \\  subtract(x: number): number;
-        \\}
-        \\
-        \\class ScientificCalculator implements Calculator {
-        \\  private _value: number = 0;
-        \\
-        \\  get value(): number {
-        \\    return this._value;
-        \\  }
-        \\
-        \\  add(x: number): number {
-        \\    this._value += x;
-        \\    return this._value;
-        \\  }
-        \\
-        \\  multiply(x: number): number {
-        \\    this._value *= x;
-        \\    return this._value;
-        \\  }
-        \\
-        \\  divide(x: number): number {
-        \\    if (x === 0) throw new Error("Division by zero");
-        \\    this._value /= x;
-        \\    return this._value;
-        \\  }
-        \\
-        \\  subtract(x: number): number {
-        \\    this._value -= x;
-        \\    return this._value;
-        \\  }
-        \\
-        \\  power(exponent: number): number {
-        \\    this._value = Math.pow(this._value, exponent);
-        \\    return this._value;
-        \\  }
-        \\
-        \\  sqrt(): number {
-        \\    this._value = Math.sqrt(this._value);
-        \\    return this._value;
-        \\  }
-        \\}
-        \\
-        \\function createCalculator(): Calculator {
-        \\  return new ScientificCalculator();
-        \\}
-        \\
-        \\const calc = createCalculator();
-        \\const result = calc.add(10).multiply(2).subtract(5).divide(3);
-        \\console.log(`Result: ${result}`);
+    return 
+    \\interface Calculator {
+    \\  value: number;
+    \\  add(x: number): number;
+    \\  multiply(x: number): number;
+    \\  divide(x: number): number;
+    \\  subtract(x: number): number;
+    \\}
+    \\
+    \\class ScientificCalculator implements Calculator {
+    \\  private _value: number = 0;
+    \\
+    \\  get value(): number {
+    \\    return this._value;
+    \\  }
+    \\
+    \\  add(x: number): number {
+    \\    this._value += x;
+    \\    return this._value;
+    \\  }
+    \\
+    \\  multiply(x: number): number {
+    \\    this._value *= x;
+    \\    return this._value;
+    \\  }
+    \\
+    \\  divide(x: number): number {
+    \\    if (x === 0) throw new Error("Division by zero");
+    \\    this._value /= x;
+    \\    return this._value;
+    \\  }
+    \\
+    \\  subtract(x: number): number {
+    \\    this._value -= x;
+    \\    return this._value;
+    \\  }
+    \\
+    \\  power(exponent: number): number {
+    \\    this._value = Math.pow(this._value, exponent);
+    \\    return this._value;
+    \\  }
+    \\
+    \\  sqrt(): number {
+    \\    this._value = Math.sqrt(this._value);
+    \\    return this._value;
+    \\  }
+    \\}
+    \\
+    \\function createCalculator(): Calculator {
+    \\  return new ScientificCalculator();
+    \\}
+    \\
+    \\const calc = createCalculator();
+    \\const result = calc.add(10).multiply(2).subtract(5).divide(3);
+    \\console.log(`Result: ${result}`);
     ;
 }
 
 fn getZigLargeSource() []const u8 {
-    return
-        \\const std = @import("std");
-        \\
-        \\const Point = struct {
-        \\    x: f64,
-        \\    y: f64,
-        \\
-        \\    pub fn init(x: f64, y: f64) Point {
-        \\        return Point{ .x = x, .y = y };
-        \\    }
-        \\
-        \\    pub fn distance(self: Point, other: Point) f64 {
-        \\        const dx = self.x - other.x;
-        \\        const dy = self.y - other.y;
-        \\        return @sqrt(dx * dx + dy * dy);
-        \\    }
-        \\
-        \\    pub fn add(self: Point, other: Point) Point {
-        \\        return Point{ .x = self.x + other.x, .y = self.y + other.y };
-        \\    }
-        \\
-        \\    pub fn scale(self: Point, factor: f64) Point {
-        \\        return Point{ .x = self.x * factor, .y = self.y * factor };
-        \\    }
-        \\};
-        \\
-        \\const Circle = struct {
-        \\    center: Point,
-        \\    radius: f64,
-        \\
-        \\    pub fn init(center: Point, radius: f64) Circle {
-        \\        return Circle{ .center = center, .radius = radius };
-        \\    }
-        \\
-        \\    pub fn area(self: Circle) f64 {
-        \\        return std.math.pi * self.radius * self.radius;
-        \\    }
-        \\
-        \\    pub fn circumference(self: Circle) f64 {
-        \\        return 2.0 * std.math.pi * self.radius;
-        \\    }
-        \\
-        \\    pub fn contains(self: Circle, point: Point) bool {
-        \\        return self.center.distance(point) <= self.radius;
-        \\    }
-        \\};
-        \\
-        \\pub fn main() void {
-        \\    const center = Point.init(0.0, 0.0);
-        \\    const circle = Circle.init(center, 5.0);
-        \\    const test_point = Point.init(3.0, 4.0);
-        \\
-        \\    std.debug.print("Circle area: {d}\n", .{circle.area()});
-        \\    std.debug.print("Point in circle: {any}\n", .{circle.contains(test_point)});
-        \\}
+    return 
+    \\const std = @import("std");
+    \\
+    \\const Point = struct {
+    \\    x: f64,
+    \\    y: f64,
+    \\
+    \\    pub fn init(x: f64, y: f64) Point {
+    \\        return Point{ .x = x, .y = y };
+    \\    }
+    \\
+    \\    pub fn distance(self: Point, other: Point) f64 {
+    \\        const dx = self.x - other.x;
+    \\        const dy = self.y - other.y;
+    \\        return @sqrt(dx * dx + dy * dy);
+    \\    }
+    \\
+    \\    pub fn add(self: Point, other: Point) Point {
+    \\        return Point{ .x = self.x + other.x, .y = self.y + other.y };
+    \\    }
+    \\
+    \\    pub fn scale(self: Point, factor: f64) Point {
+    \\        return Point{ .x = self.x * factor, .y = self.y * factor };
+    \\    }
+    \\};
+    \\
+    \\const Circle = struct {
+    \\    center: Point,
+    \\    radius: f64,
+    \\
+    \\    pub fn init(center: Point, radius: f64) Circle {
+    \\        return Circle{ .center = center, .radius = radius };
+    \\    }
+    \\
+    \\    pub fn area(self: Circle) f64 {
+    \\        return std.math.pi * self.radius * self.radius;
+    \\    }
+    \\
+    \\    pub fn circumference(self: Circle) f64 {
+    \\        return 2.0 * std.math.pi * self.radius;
+    \\    }
+    \\
+    \\    pub fn contains(self: Circle, point: Point) bool {
+    \\        return self.center.distance(point) <= self.radius;
+    \\    }
+    \\};
+    \\
+    \\pub fn main() void {
+    \\    const center = Point.init(0.0, 0.0);
+    \\    const circle = Circle.init(center, 5.0);
+    \\    const test_point = Point.init(3.0, 4.0);
+    \\
+    \\    std.debug.print("Circle area: {d}\n", .{circle.area()});
+    \\    std.debug.print("Point in circle: {any}\n", .{circle.contains(test_point)});
+    \\}
     ;
 }
 
 fn getJsonMediumSource() []const u8 {
-    return
-        \\{
-        \\  "name": "grove-performance-test",
-        \\  "version": "1.0.0",
-        \\  "description": "Performance testing data for Grove parser",
-        \\  "keywords": ["parser", "tree-sitter", "performance"],
-        \\  "author": {
-        \\    "name": "Grove Team",
-        \\    "email": "team@grove.dev"
-        \\  },
-        \\  "dependencies": {
-        \\    "tree-sitter": "^0.20.0",
-        \\    "typescript": "^4.9.0"
-        \\  },
-        \\  "devDependencies": {
-        \\    "zig": "^0.16.0",
-        \\    "eslint": "^8.0.0",
-        \\    "prettier": "^2.8.0"
-        \\  },
-        \\  "scripts": {
-        \\    "build": "zig build",
-        \\    "test": "zig test",
-        \\    "bench": "zig build bench",
-        \\    "lint": "eslint .",
-        \\    "format": "prettier --write ."
-        \\  },
-        \\  "repository": {
-        \\    "type": "git",
-        \\    "url": "https://github.com/grove-team/grove.git"
-        \\  },
-        \\  "license": "MIT",
-        \\  "engines": {
-        \\    "node": ">=16.0.0"
-        \\  },
-        \\  "config": {
-        \\    "benchmark": {
-        \\      "iterations": 1000,
-        \\      "warmup": 100,
-        \\      "timeout": 30000
-        \\    }
-        \\  }
-        \\}
+    return 
+    \\{
+    \\  "name": "grove-performance-test",
+    \\  "version": "1.0.0",
+    \\  "description": "Performance testing data for Grove parser",
+    \\  "keywords": ["parser", "tree-sitter", "performance"],
+    \\  "author": {
+    \\    "name": "Grove Team",
+    \\    "email": "team@grove.dev"
+    \\  },
+    \\  "dependencies": {
+    \\    "tree-sitter": "^0.20.0",
+    \\    "typescript": "^4.9.0"
+    \\  },
+    \\  "devDependencies": {
+    \\    "zig": "^0.16.0",
+    \\    "eslint": "^8.0.0",
+    \\    "prettier": "^2.8.0"
+    \\  },
+    \\  "scripts": {
+    \\    "build": "zig build",
+    \\    "test": "zig test",
+    \\    "bench": "zig build bench",
+    \\    "lint": "eslint .",
+    \\    "format": "prettier --write ."
+    \\  },
+    \\  "repository": {
+    \\    "type": "git",
+    \\    "url": "https://github.com/grove-team/grove.git"
+    \\  },
+    \\  "license": "MIT",
+    \\  "engines": {
+    \\    "node": ">=16.0.0"
+    \\  },
+    \\  "config": {
+    \\    "benchmark": {
+    \\      "iterations": 1000,
+    \\      "warmup": 100,
+    \\      "timeout": 30000
+    \\    }
+    \\  }
+    \\}
     ;
 }
 
 fn getRustMediumSource() []const u8 {
-    return
-        \\use std::collections::HashMap;
-        \\
-        \\#[derive(Debug, Clone)]
-        \\struct Point {
-        \\    x: f64,
-        \\    y: f64,
-        \\}
-        \\
-        \\impl Point {
-        \\    fn new(x: f64, y: f64) -> Self {
-        \\        Point { x, y }
-        \\    }
-        \\
-        \\    fn distance(&self, other: &Point) -> f64 {
-        \\        let dx = self.x - other.x;
-        \\        let dy = self.y - other.y;
-        \\        (dx * dx + dy * dy).sqrt()
-        \\    }
-        \\}
-        \\
-        \\struct PointManager {
-        \\    points: HashMap<String, Point>,
-        \\}
-        \\
-        \\impl PointManager {
-        \\    fn new() -> Self {
-        \\        PointManager {
-        \\            points: HashMap::new(),
-        \\        }
-        \\    }
-        \\
-        \\    fn add_point(&mut self, name: String, point: Point) {
-        \\        self.points.insert(name, point);
-        \\    }
-        \\
-        \\    fn get_point(&self, name: &str) -> Option<&Point> {
-        \\        self.points.get(name)
-        \\    }
-        \\
-        \\    fn calculate_distances(&self) -> Vec<(String, String, f64)> {
-        \\        let mut distances = Vec::new();
-        \\        let point_names: Vec<_> = self.points.keys().collect();
-        \\
-        \\        for i in 0..point_names.len() {
-        \\            for j in (i + 1)..point_names.len() {
-        \\                if let (Some(p1), Some(p2)) = (
-        \\                    self.points.get(point_names[i]),
-        \\                    self.points.get(point_names[j])
-        \\                ) {
-        \\                    let dist = p1.distance(p2);
-        \\                    distances.push((
-        \\                        point_names[i].clone(),
-        \\                        point_names[j].clone(),
-        \\                        dist
-        \\                    ));
-        \\                }
-        \\            }
-        \\        }
-        \\
-        \\        distances
-        \\    }
-        \\}
-        \\
-        \\fn main() {
-        \\    let mut manager = PointManager::new();
-        \\    manager.add_point("origin".to_string(), Point::new(0.0, 0.0));
-        \\    manager.add_point("unit".to_string(), Point::new(1.0, 1.0));
-        \\
-        \\    let distances = manager.calculate_distances();
-        \\    for (p1, p2, dist) in distances {
-        \\        println!("Distance from {} to {}: {:.2}", p1, p2, dist);
-        \\    }
-        \\}
+    return 
+    \\use std::collections::HashMap;
+    \\
+    \\#[derive(Debug, Clone)]
+    \\struct Point {
+    \\    x: f64,
+    \\    y: f64,
+    \\}
+    \\
+    \\impl Point {
+    \\    fn new(x: f64, y: f64) -> Self {
+    \\        Point { x, y }
+    \\    }
+    \\
+    \\    fn distance(&self, other: &Point) -> f64 {
+    \\        let dx = self.x - other.x;
+    \\        let dy = self.y - other.y;
+    \\        (dx * dx + dy * dy).sqrt()
+    \\    }
+    \\}
+    \\
+    \\struct PointManager {
+    \\    points: HashMap<String, Point>,
+    \\}
+    \\
+    \\impl PointManager {
+    \\    fn new() -> Self {
+    \\        PointManager {
+    \\            points: HashMap::new(),
+    \\        }
+    \\    }
+    \\
+    \\    fn add_point(&mut self, name: String, point: Point) {
+    \\        self.points.insert(name, point);
+    \\    }
+    \\
+    \\    fn get_point(&self, name: &str) -> Option<&Point> {
+    \\        self.points.get(name)
+    \\    }
+    \\
+    \\    fn calculate_distances(&self) -> Vec<(String, String, f64)> {
+    \\        let mut distances = Vec::new();
+    \\        let point_names: Vec<_> = self.points.keys().collect();
+    \\
+    \\        for i in 0..point_names.len() {
+    \\            for j in (i + 1)..point_names.len() {
+    \\                if let (Some(p1), Some(p2)) = (
+    \\                    self.points.get(point_names[i]),
+    \\                    self.points.get(point_names[j])
+    \\                ) {
+    \\                    let dist = p1.distance(p2);
+    \\                    distances.push((
+    \\                        point_names[i].clone(),
+    \\                        point_names[j].clone(),
+    \\                        dist
+    \\                    ));
+    \\                }
+    \\            }
+    \\        }
+    \\
+    \\        distances
+    \\    }
+    \\}
+    \\
+    \\fn main() {
+    \\    let mut manager = PointManager::new();
+    \\    manager.add_point("origin".to_string(), Point::new(0.0, 0.0));
+    \\    manager.add_point("unit".to_string(), Point::new(1.0, 1.0));
+    \\
+    \\    let distances = manager.calculate_distances();
+    \\    for (p1, p2, dist) in distances {
+    \\        println!("Distance from {} to {}: {:.2}", p1, p2, dist);
+    \\    }
+    \\}
     ;
 }

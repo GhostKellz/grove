@@ -22,12 +22,22 @@ Grove is a modern Zig wrapper around the Tree-sitter parsing library, focusing o
 
 ## Bundled Grammars
 
-- **Zig** (`maxxnino/tree-sitter-zig` – commit a80a6e9, vendored). Exposed via `grove.Languages.zig.get()`.
-- **JSON** (`tree-sitter-json` – master @ 2024-09-24). Available via `grove.Languages.json.get()` for instant smoke tests.
-- **Rust** (`tree-sitter-rust` – v0.25.3, vendored). Exposed via `grove.Languages.rust.get()` with scanner support.
-- **Ghostlang** (`ghostlang/tree-sitter-ghostlang` – v0.1.0, vendored with local precedence fixes). Exposed via `grove.Languages.ghostlang.get()` and ships highlight/query bundles for `.ghost`/`.gza` files.
-- **TypeScript** – scheduled Week 3 to support Grim web tooling.
-- **Markdown** – scheduled Week 4 for docs rendering.
+Grove ships with **14 production-ready grammars**, all compiled against tree-sitter 0.25.10 (ABI 15):
+
+- **JSON** – `grove.Languages.json.get()` – Configuration and data files
+- **Zig** – `grove.Languages.zig.get()` – Zig programming language
+- **Rust** – `grove.Languages.rust.get()` – Rust with scanner support
+- **Ghostlang** – `grove.Languages.ghostlang.get()` – Ghostlang scripting (`.ghost`, `.gza`)
+- **TypeScript** – `grove.Languages.typescript.get()` – TypeScript with scanner
+- **TSX** – `grove.Languages.tsx.get()` – TypeScript + JSX
+- **Bash** – `grove.Languages.bash.get()` – Shell scripting
+- **JavaScript** – `grove.Languages.javascript.get()` – JavaScript with scanner
+- **Python** – `grove.Languages.python.get()` – Python 3.x
+- **Markdown** – `grove.Languages.markdown.get()` – Documentation and prose
+- **CMake** – `grove.Languages.cmake.get()` – Build system configuration
+- **TOML** – `grove.Languages.toml.get()` – Cargo.toml, pyproject.toml, configs
+- **YAML** – `grove.Languages.yaml.get()` – CI/CD, Kubernetes, Docker Compose
+- **C** – `grove.Languages.c.get()` – C programming language
 
 ### Ghostlang Support Snapshot
 
@@ -63,7 +73,8 @@ Grove follows a phased approach:
 - 🔄 Maintain JSON grammar for configuration flows
 - ✅ Vendor Rust grammar (scanner support) for Grim plugins
 - ✅ Stage Ghostlang grammar and ship `.ghost`/`.gza` highlight queries
-- 🔄 Prepare TypeScript and Markdown grammars to round out editor coverage
+- ✅ TypeScript grammar wired into Grove module with highlight regression tests
+- 🔄 Prepare Markdown grammar to round out editor coverage
 
 ### Week 3–4 · Performance Optimisation
 
@@ -90,7 +101,7 @@ Grove follows a phased approach:
 ### Success Metrics
 
 - ⚡ **Performance**: meet or exceed C Tree-sitter throughput with <10 ms incremental latency and 50 % lower memory footprint
-- 🧠 **Grammar Coverage**: ≥6 highlighted languages, including Zig, JSON, Rust, Ghostlang, TypeScript, Markdown
+- 🧠 **Grammar Coverage**: ✅ 14 highlighted languages (JSON, Zig, Rust, Ghostlang, TypeScript, TSX, Bash, JavaScript, Python, Markdown, CMake, TOML, YAML, C)
 - 🛠️ **Editor Experience**: Complete Grim integration with syntax, folding, symbols, and navigation APIs
 - 🌱 **Ecosystem Health**: Publish Grove as a reusable Zig package, attract external grammar contributions, and position Grove as the Zig reference implementation for Tree-sitter
 
@@ -123,6 +134,12 @@ Run the throughput benchmark harness:
 zig build bench
 ```
 
+Track incremental latency against the <5 ms target:
+
+```bash
+zig build bench-latency
+```
+
 ### Quick Parse Example
 
 ```zig
@@ -147,18 +164,18 @@ pub fn main() !void {
 }
 ```
 
-	## Editor Toolkit
+## Editor Toolkit
 
-	- **Queries**: `grove.Query` and `grove.QueryCursor` wrap Tree-sitter query APIs with Zig safety, capture metadata, and dynamic registry support.
-	- **Highlights**: `grove.Highlight.collectHighlights` and `HighlightEngine` map captures to Grim highlight classes.
-	- **Editor Utilities**: `grove.Editor` exposes `getHighlights`, `getFoldingRanges`, `getDocumentSymbols`, `findDefinition`, and `hover` helpers for LSP plumbing.
-	- **Dynamic Grammars**: `grove.LanguageRegistry` registers additional grammars from shared libraries for live grammar swaps.
+- **Queries**: `grove.Query` and `grove.QueryCursor` wrap Tree-sitter query APIs with Zig safety, capture metadata, and dynamic registry support.
+- **Highlights**: `grove.Highlight.collectHighlights` and `HighlightEngine` map captures to Grim highlight classes.
+- **Editor Utilities**: `grove.Editor` exposes `getHighlights`, `getFoldingRanges`, `getDocumentSymbols`, `findDefinition`, and `hover` helpers for LSP plumbing.
+- **Dynamic Grammars**: `grove.LanguageRegistry` registers additional grammars from shared libraries for live grammar swaps.
 
-	## Performance Helpers
+## Performance Helpers
 
-	- **Chunked Input**: `Parser.parseChunks` feeds rope segments or streaming buffers directly into Tree-sitter without concatenation.
-	- **Timing & Benchmarks**: `Parser.parseUtf8Timed` returns `ParseReport { tree, duration_ns, bytes }` for profiling. `zig build bench` parses bundled Zig sources and prints throughput.
-	- **Parser Pooling**: `grove.ParserPool` leases configured parsers across threads, eliminating hot-path reinitialisation overhead.
+- **Chunked Input**: `Parser.parseChunks` feeds rope segments or streaming buffers directly into Tree-sitter without concatenation.
+- **Timing & Benchmarks**: `Parser.parseUtf8Timed` returns `ParseReport { tree, duration_ns, bytes }` for profiling. `zig build bench` parses bundled Zig sources and prints throughput, while `zig build bench-latency` samples incremental edits.
+- **Parser Pooling**: `grove.ParserPool` leases configured parsers across threads, eliminating hot-path reinitialisation overhead.
 
 ## License
 

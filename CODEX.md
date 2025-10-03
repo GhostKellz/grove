@@ -19,16 +19,28 @@
 4. **Incremental delivery**: Ship thin vertical slices (MVP → Alpha → Beta → RC) with continuous feedback loops.
 5. **Documentation parity**: Every feature ships with developer docs or examples. We treat docs and API shape as part of the deliverable.
 
+## Status Log — 2025-10-05
+- **Tree-sitter ABI 15 upgrade complete**: Core headers refreshed with new language metadata and compatibility fields; build now targets CLI/runtime 0.25.x with updated struct layout.
+- **Rust grammar reinstated**: Vendored `tree-sitter-rust` sources restored to build graph, editor services, tooling, and docs; highlights and benchmarks include Rust coverage again.
+- **Latency benchmark wired in**: Added `zig build bench-latency` executable with seed fixtures to enforce the <5 ms incremental target; baseline captured for release readiness.
+- **Release docs refresh underway**: README, roadmap, and integration guides being polished ahead of RC1; changelog draft queued.
+
+## Status Log — 2025-10-03
+- **TypeScript grammar bundled**: Vendored parser/scanner compiled into Grove build; `Languages.typescript` exposed with highlight regression tests exercising vendored queries.
+- **Highlight regression scaffolded**: TypeScript samples assert capture coverage to guard future query tweaks; Ghostlang utilities remain green.
+- **Benchmark harness staged**: `zig build bench` now exercises Zig/JSON/TypeScript; throughput targets tracked in `grove-performance-baseline.json` ahead of Beta gates.
+- **Markdown grammar pending**: Awaiting vendored parser drop before wiring highlight fixtures and registry hookup.
+
 ## Status Log — 2025-09-24
 - **Ghostlang grammar ready for production**: Corpus expectations rewritten to match richer AST output, highlight and locals queries aligned with the new postfix-expression structure, and the `tree-sitter test` suite passes cleanly.
 - **Vendored assets verified**: `vendor/grammars/ghostlang/` mirrors the latest generated parser and queries; diffs against `tree-sitter-ghostlang/` are empty.
 - **Grove test suite green**: `zig build test` passes with Ghostlang registered in `languages.zig` and the highlight engine loading vendored queries.
 
 ### Next Focus When We Return
-- Extend editor utilities to exercise Ghostlang locals/textobject queries (document symbols, folding) and capture sample fixtures.
-- Coordinate with Grim to consume the vendored Ghostlang bundle and validate `.gza` file associations end-to-end.
-- Publish a short integration note or changelog entry summarizing Ghostlang Phase 1 landing (README + docs refresh where relevant).
-- Keep TypeScript/Markdown grammar onboarding on deck once Ghostlang checks land in Grim.
+- Land Markdown grammar vendoring + highlight fixtures to complete Beta language scope.
+- Coordinate with Grim to consume the vendored Ghostlang bundle and validate `.gza` file associations end-to-end (merge `feature/ghostlang-gza-adapter`).
+- Publish a short integration note or changelog entry summarizing Ghostlang Phase 1 and TypeScript bundling (README + docs refresh where relevant).
+- Stand up TypeScript/Markdown benchmark scenarios in Grim rope simulator to nail throughput + latency targets.
 
 ### Quick Reminders
 - Re-run `npx tree-sitter test` under `tree-sitter-ghostlang/` and `zig build test` after any grammar/query tweaks.

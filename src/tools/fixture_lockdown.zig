@@ -131,9 +131,7 @@ fn checkChecksums(allocator: std.mem.Allocator) !void {
             std.debug.print("   Current:  {s}\n", .{current.?.checksum});
             changes_found = true;
         } else if (expected.size != current.?.size) {
-            std.debug.print("📏 Size changed: {s} ({d} -> {d} bytes)\n", .{
-                expected.path, expected.size, current.?.size
-            });
+            std.debug.print("📏 Size changed: {s} ({d} -> {d} bytes)\n", .{ expected.path, expected.size, current.?.size });
             changes_found = true;
         }
     }
@@ -326,7 +324,7 @@ fn readChecksumFile(allocator: std.mem.Allocator) ![]FixtureEntry {
         const entry_start = std.mem.indexOfPos(u8, fixtures_content, pos, "{") orelse break;
         const entry_end = std.mem.indexOfPos(u8, fixtures_content, entry_start, "}") orelse break;
 
-        const entry_content = fixtures_content[entry_start..entry_end + 1];
+        const entry_content = fixtures_content[entry_start .. entry_end + 1];
 
         // Extract fields (simplified parsing)
         const path = try extractJsonString(allocator, entry_content, "path");

@@ -196,7 +196,7 @@ pub const QueryRegistry = struct {
             \\{{
             \\  "grove_version": "0.1.0",
             \\  "status": "RC1",
-            \\  "supported_languages": ["ghostlang", "typescript", "tsx", "zig", "json", "rust"],
+                 \\  "supported_languages": ["ghostlang", "typescript", "tsx", "zig", "json", "rust"],
             \\  "features": ["highlights", "locals", "textobjects", "folding", "symbols"]
             \\}}
             , .{});

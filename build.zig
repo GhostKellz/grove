@@ -33,9 +33,28 @@ pub fn build(b: *std.Build) void {
     const json_grammar_source = b.path("vendor/grammars/json/parser.c");
     const zig_grammar_source = b.path("vendor/grammars/zig/parser.c");
     const ghostlang_grammar_source = b.path("vendor/grammars/ghostlang/parser.c");
-    // const rust_grammar_source = b.path("vendor/tree-sitter-rust/src/parser.c");
-    // const rust_scanner_source = b.path("vendor/tree-sitter-rust/src/scanner.c");
-    // const rust_include_path = b.path("vendor/tree-sitter-rust/src");
+    const typescript_grammar_source = b.path("vendor/grammars/typescript/parser.c");
+    const typescript_scanner_source = b.path("vendor/grammars/typescript/scanner.c");
+    const tsx_grammar_source = b.path("vendor/grammars/tsx/parser.c");
+    const tsx_scanner_source = b.path("vendor/grammars/tsx/scanner.c");
+    const rust_grammar_source = b.path("vendor/tree-sitter-rust/src/parser.c");
+    const rust_scanner_source = b.path("vendor/tree-sitter-rust/src/scanner.c");
+    const rust_include_path = b.path("vendor/tree-sitter-rust/src");
+    const bash_grammar_source = b.path("vendor/grammars/bash/parser.c");
+    const bash_scanner_source = b.path("vendor/grammars/bash/scanner.c");
+    const javascript_grammar_source = b.path("vendor/grammars/javascript/parser.c");
+    const javascript_scanner_source = b.path("vendor/grammars/javascript/scanner.c");
+    const python_grammar_source = b.path("vendor/grammars/python/parser.c");
+    const python_scanner_source = b.path("vendor/grammars/python/scanner.c");
+    const markdown_grammar_source = b.path("vendor/grammars/markdown/parser.c");
+    const markdown_scanner_source = b.path("vendor/grammars/markdown/scanner.c");
+    const cmake_grammar_source = b.path("vendor/grammars/cmake/parser.c");
+    const cmake_scanner_source = b.path("vendor/grammars/cmake/scanner.c");
+    const toml_grammar_source = b.path("vendor/grammars/toml/parser.c");
+    const toml_scanner_source = b.path("vendor/grammars/toml/scanner.c");
+    const yaml_grammar_source = b.path("vendor/grammars/yaml/parser.c");
+    const yaml_scanner_source = b.path("vendor/grammars/yaml/scanner.c");
+    const c_grammar_source = b.path("vendor/grammars/c/parser.c");
     const tree_sitter_flags = &.{
         "-std=c99",
         "-DTREE_SITTER_STATIC=1",
@@ -60,9 +79,28 @@ pub fn build(b: *std.Build) void {
     mod.addCSourceFile(.{ .file = json_grammar_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = zig_grammar_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = ghostlang_grammar_source, .flags = &.{"-std=c99"} });
-    // mod.addCSourceFile(.{ .file = rust_grammar_source, .flags = &.{"-std=c99"} });
-    // mod.addCSourceFile(.{ .file = rust_scanner_source, .flags = &.{"-std=c99"} });
-    // mod.addIncludePath(rust_include_path);
+    mod.addCSourceFile(.{ .file = typescript_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = typescript_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = tsx_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = tsx_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = rust_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = rust_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addIncludePath(rust_include_path);
+    mod.addCSourceFile(.{ .file = bash_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = bash_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = javascript_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = javascript_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = python_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = python_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = markdown_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = markdown_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = cmake_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = cmake_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = toml_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = toml_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = yaml_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = yaml_scanner_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = c_grammar_source, .flags = &.{"-std=c99"} });
 
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function
@@ -106,7 +144,6 @@ pub fn build(b: *std.Build) void {
         }),
     });
     exe.addIncludePath(tree_sitter_include);
-    // exe.addIncludePath(rust_include_path);
     exe.linkLibC();
 
     // This declares intent for the executable to be installed into the
@@ -148,7 +185,6 @@ pub fn build(b: *std.Build) void {
         .root_module = mod,
     });
     mod_tests.addIncludePath(tree_sitter_include);
-    // mod_tests.addIncludePath(rust_include_path);
     mod_tests.linkLibC();
 
     // A run step that will run the test executable.
@@ -161,7 +197,6 @@ pub fn build(b: *std.Build) void {
         .root_module = exe.root_module,
     });
     exe_tests.addIncludePath(tree_sitter_include);
-    // exe_tests.addIncludePath(rust_include_path);
     exe_tests.linkLibC();
 
     // A run step that will run the second test executable.
@@ -186,13 +221,31 @@ pub fn build(b: *std.Build) void {
         }),
     });
     bench_exe.addIncludePath(tree_sitter_include);
-    // bench_exe.addIncludePath(rust_include_path);
     bench_exe.linkLibC();
     const run_bench = b.addRunArtifact(bench_exe);
     run_bench.step.dependOn(b.getInstallStep());
 
     const bench_step = b.step("bench", "Run performance benchmarks");
     bench_step.dependOn(&run_bench.step);
+
+    const latency_exe = b.addExecutable(.{
+        .name = "grove-bench-latency",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/benchmarks/latency.zig"),
+            .target = target,
+            .optimize = .ReleaseFast,
+            .imports = &.{
+                .{ .name = "grove", .module = mod },
+            },
+        }),
+    });
+    latency_exe.addIncludePath(tree_sitter_include);
+    latency_exe.linkLibC();
+    const run_latency = b.addRunArtifact(latency_exe);
+    run_latency.step.dependOn(b.getInstallStep());
+
+    const latency_step = b.step("bench-latency", "Run incremental latency benchmark");
+    latency_step.dependOn(&run_latency.step);
 
     // Just like flags, top level steps are also listed in the `--help` menu.
     //

@@ -25,8 +25,7 @@ CI tests grammar              CI tests editor   E2E testing
 ### **Grove Branches**
 - `main` - Stable Grove releases
 - `feature/ghostlang-utilities` - Editor utilities development
-- `feature/alpha-release` - Alpha phase preparation
-- `develop` - Integration branch for Grove features
+- `dev` - Dev/testing 
 
 ### **Grim Branches**
 - `main` - Stable Grim releases

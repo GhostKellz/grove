@@ -343,7 +343,7 @@ pub const LanguageServerFactory = struct {
         if (std.mem.eql(u8, language_name, "jsx")) return self.createTypeScriptServer();
         if (std.mem.eql(u8, language_name, "zig")) return self.createZigServer();
         if (std.mem.eql(u8, language_name, "json")) return self.createJSONServer();
-        if (std.mem.eql(u8, language_name, "rust")) return self.createRustServer();
+    if (std.mem.eql(u8, language_name, "rust")) return self.createRustServer();
         if (std.mem.eql(u8, language_name, "ghostlang")) return self.createGhostlangServer();
 
         return error.UnsupportedLanguage;

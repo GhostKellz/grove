@@ -41,6 +41,7 @@ This document coordinates the Grove ↔ Grim touchpoints required to validate `.
 5. **Report back**
    - Update `CODEX.md` Status Log with results.
    - Mark Grove Alpha checklist items complete (see `TODO.md`).
+   - Mirror follow-up actions in `GRIM_TODO.md` before requesting merge into Grim `main`.
 
 ## Quick Test Harness
 

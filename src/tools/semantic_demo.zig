@@ -28,7 +28,7 @@ pub fn main() !void {
     if (args.len >= 3) {
         if (std.mem.indexOf(u8, args[2], ":")) |colon_pos| {
             target_line = std.fmt.parseInt(u32, args[2][0..colon_pos], 10) catch null;
-            target_column = std.fmt.parseInt(u32, args[2][colon_pos + 1..], 10) catch null;
+            target_column = std.fmt.parseInt(u32, args[2][colon_pos + 1 ..], 10) catch null;
         }
     }
 
@@ -109,13 +109,7 @@ fn demoTypeScript(allocator: std.mem.Allocator, target_line: ?u32, target_column
     // Demonstrate position analysis if coordinates provided
     if (target_line != null and target_column != null) {
         std.debug.print("📍 Position Analysis at {}:{}\n", .{ target_line.?, target_column.? });
-        const position_analysis = try grove.Semantic.analyzePosition(
-            allocator,
-            tree.rootNode().?,
-            target_line.?,
-            target_column.?,
-            .typescript
-        );
+        const position_analysis = try grove.Semantic.analyzePosition(allocator, tree.rootNode().?, target_line.?, target_column.?, .typescript);
 
         std.debug.print("Node type: {s}\n", .{position_analysis.node.kind()});
         std.debug.print("Context: {s}\n", .{@tagName(position_analysis.context)});

@@ -122,10 +122,7 @@ fn generateHealthReport(allocator: std.mem.Allocator) !void {
 
     // Print summary
     std.debug.print("Health Summary:\n", .{});
-    std.debug.print("  Tests: {d}/{d} passing ({d:.1}%)\n", .{
-        health.tests_passing, health.tests_total,
-        (@as(f64, @floatFromInt(health.tests_passing)) / @as(f64, @floatFromInt(health.tests_total))) * 100.0
-    });
+    std.debug.print("  Tests: {d}/{d} passing ({d:.1}%)\n", .{ health.tests_passing, health.tests_total, (@as(f64, @floatFromInt(health.tests_passing)) / @as(f64, @floatFromInt(health.tests_total))) * 100.0 });
     std.debug.print("  Build: {s}\n", .{health.build_status});
     std.debug.print("  Fixtures: {s}\n", .{if (health.fixture_integrity) "✅ Intact" else "❌ Modified"});
     std.debug.print("  API: {s}\n", .{health.api_stability});

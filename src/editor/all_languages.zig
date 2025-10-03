@@ -8,6 +8,14 @@ const TypeScriptUtilities = @import("typescript.zig").TypeScriptUtilities;
 const ZigUtilities = @import("zig_lang.zig").ZigUtilities;
 const JsonUtilities = @import("json_lang.zig").JsonUtilities;
 const RustUtilities = @import("rust_lang.zig").RustUtilities;
+const BashUtilities = @import("bash_lang.zig").BashUtilities;
+const JavaScriptUtilities = @import("javascript_lang.zig").JavaScriptUtilities;
+const PythonUtilities = @import("python_lang.zig").PythonUtilities;
+const MarkdownUtilities = @import("markdown_lang.zig").MarkdownUtilities;
+const CMakeUtilities = @import("cmake_lang.zig").CMakeUtilities;
+const TOMLUtilities = @import("toml_lang.zig").TOMLUtilities;
+const YAMLUtilities = @import("yaml_lang.zig").YAMLUtilities;
+const CUtilities = @import("c_lang.zig").CUtilities;
 
 const DocumentSymbol = Features.DocumentSymbol;
 const FoldingOptions = Features.FoldingOptions;
@@ -26,6 +34,14 @@ pub const LanguageUtilities = union(enum) {
     zig: ZigUtilities,
     json: JsonUtilities,
     rust: RustUtilities,
+    bash: BashUtilities,
+    javascript: JavaScriptUtilities,
+    python: PythonUtilities,
+    markdown: MarkdownUtilities,
+    cmake: CMakeUtilities,
+    toml: TOMLUtilities,
+    yaml: YAMLUtilities,
+    c: CUtilities,
 
     pub fn init(allocator: std.mem.Allocator, language: Languages) !LanguageUtilities {
         return switch (language) {
@@ -35,6 +51,14 @@ pub const LanguageUtilities = union(enum) {
             .zig => LanguageUtilities{ .zig = try ZigUtilities.init(allocator) },
             .json => LanguageUtilities{ .json = try JsonUtilities.init(allocator) },
             .rust => LanguageUtilities{ .rust = try RustUtilities.init(allocator) },
+            .bash => LanguageUtilities{ .bash = try BashUtilities.init(allocator) },
+            .javascript => LanguageUtilities{ .javascript = try JavaScriptUtilities.init(allocator) },
+            .python => LanguageUtilities{ .python = try PythonUtilities.init(allocator) },
+            .markdown => LanguageUtilities{ .markdown = try MarkdownUtilities.init(allocator) },
+            .cmake => LanguageUtilities{ .cmake = try CMakeUtilities.init(allocator) },
+            .toml => LanguageUtilities{ .toml = try TOMLUtilities.init(allocator) },
+            .yaml => LanguageUtilities{ .yaml = try YAMLUtilities.init(allocator) },
+            .c => LanguageUtilities{ .c = try CUtilities.init(allocator) },
         };
     }
 
@@ -46,6 +70,14 @@ pub const LanguageUtilities = union(enum) {
             .zig => |*utils| utils.deinit(),
             .json => |*utils| utils.deinit(),
             .rust => |*utils| utils.deinit(),
+            .bash => |*utils| utils.deinit(),
+            .javascript => |*utils| utils.deinit(),
+            .python => |*utils| utils.deinit(),
+            .markdown => |*utils| utils.deinit(),
+            .cmake => |*utils| utils.deinit(),
+            .toml => |*utils| utils.deinit(),
+            .yaml => |*utils| utils.deinit(),
+            .c => |*utils| utils.deinit(),
         }
     }
 
@@ -61,6 +93,14 @@ pub const LanguageUtilities = union(enum) {
             .zig => |*utils| utils.documentSymbols(root, source),
             .json => |*utils| utils.documentSymbols(root, source),
             .rust => |*utils| utils.documentSymbols(root, source),
+            .bash => |*utils| utils.documentSymbols(root, source),
+            .javascript => |*utils| utils.documentSymbols(root, source),
+            .python => |*utils| utils.documentSymbols(root, source),
+            .markdown => |*utils| utils.documentSymbols(root, source),
+            .cmake => |*utils| utils.documentSymbols(root, source),
+            .toml => |*utils| utils.documentSymbols(root, source),
+            .yaml => |*utils| utils.documentSymbols(root, source),
+            .c => |*utils| utils.documentSymbols(root, source),
         };
     }
 
@@ -76,6 +116,14 @@ pub const LanguageUtilities = union(enum) {
             .zig => |*utils| utils.foldingRanges(root, options),
             .json => |*utils| utils.foldingRanges(root, options),
             .rust => |*utils| utils.foldingRanges(root, options),
+            .bash => |*utils| utils.foldingRanges(root, options),
+            .javascript => |*utils| utils.foldingRanges(root, options),
+            .python => |*utils| utils.foldingRanges(root, options),
+            .markdown => |*utils| utils.foldingRanges(root, options),
+            .cmake => |*utils| utils.foldingRanges(root, options),
+            .toml => |*utils| utils.foldingRanges(root, options),
+            .yaml => |*utils| utils.foldingRanges(root, options),
+            .c => |*utils| utils.foldingRanges(root, options),
         };
     }
 };
@@ -153,39 +201,108 @@ test "editor services work for all bundled languages" {
         .{
             .language = .json,
             .source =
-                \\{"name": "test", "value": 42}
+            \\{"name": "test", "value": 42}
             ,
         },
         .{
             .language = .zig,
             .source =
-                \\pub fn main() void {
-                \\    const x = 42;
-                \\}
-            ,
-        },
-        .{
-            .language = .typescript,
-            .source =
-                \\function greet(name: string) {
-                \\    return "Hello " + name;
-                \\}
+            \\pub fn main() void {
+            \\    const x = 42;
+            \\}
             ,
         },
         .{
             .language = .rust,
             .source =
-                \\fn main() {
-                \\    println!("Hello, world!");
-                \\}
+            \\fn main() {
+            \\    println!("Hello, world!");
+            \\}
+            ,
+        },
+        .{
+            .language = .typescript,
+            .source =
+            \\function greet(name: string) {
+            \\    return "Hello " + name;
+            \\}
+            ,
+        },
+        .{
+            .language = .tsx,
+            .source =
+            \\function Button(props: { label: string }) {
+            \\    return <button>{props.label}</button>;
+            \\}
             ,
         },
         .{
             .language = .ghostlang,
             .source =
-                \\function test() {
-                \\    var x = 1;
-                \\}
+            \\function test() {
+            \\    var x = 1;
+            \\}
+            ,
+        },
+        .{
+            .language = .bash,
+            .source =
+            \\function greet() {
+            \\  echo "Hello"
+            \\}
+            ,
+        },
+        .{
+            .language = .javascript,
+            .source =
+            \\function test() {
+            \\  return 42;
+            \\}
+            ,
+        },
+        .{
+            .language = .python,
+            .source =
+            \\def test():
+            \\    return 42
+            ,
+        },
+        .{
+            .language = .markdown,
+            .source =
+            \\# Title
+            \\Some text
+            ,
+        },
+        .{
+            .language = .cmake,
+            .source =
+            \\function(my_function)
+            \\  message("Hello")
+            \\endfunction()
+            ,
+        },
+        .{
+            .language = .toml,
+            .source =
+            \\[package]
+            \\name = "example"
+            ,
+        },
+        .{
+            .language = .yaml,
+            .source =
+            \\services:
+            \\  web:
+            \\    image: nginx
+            ,
+        },
+        .{
+            .language = .c,
+            .source =
+            \\int main() {
+            \\  return 0;
+            \\}
             ,
         },
     };
