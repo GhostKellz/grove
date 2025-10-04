@@ -7,36 +7,55 @@ module.exports = grammar({
   rules: {
     source_file: $ => repeat(choice(
       $.variable_declaration,
+      $.local_variable_declaration,
       $.function_declaration,
+      $.local_function_declaration,
       $.if_statement,
       $.while_statement,
       $.for_statement,
+      $.generic_for_statement,
       $.numeric_for_statement,
       $.repeat_statement,
       $.expression_statement,
       $.block_statement,
       $.return_statement,
+      $.break_statement,
+      $.continue_statement,
       $.empty_statement,
       $.comment
     )),
 
     statement: $ => choice(
       $.variable_declaration,
+      $.local_variable_declaration,
       $.function_declaration,
+      $.local_function_declaration,
       $.if_statement,
       $.while_statement,
       $.for_statement,
+      $.generic_for_statement,
       $.numeric_for_statement,
       $.repeat_statement,
       $.expression_statement,
       $.block_statement,
       $.return_statement,
+      $.break_statement,
+      $.continue_statement,
       $.empty_statement
     ),
 
     // Variable declarations: var x = 5;
     variable_declaration: $ => seq(
       'var',
+      field('name', $.identifier),
+      '=',
+      field('value', $._expression_base),
+      ';'
+    ),
+
+    // Local variable declarations: local x = 5;
+    local_variable_declaration: $ => seq(
+      'local',
       field('name', $.identifier),
       '=',
       field('value', $._expression_base),
@@ -59,14 +78,25 @@ module.exports = grammar({
       field('body', $.block_statement)
     ),
 
+    // Local function declarations: local function name() { ... }
+    local_function_declaration: $ => seq(
+      'local',
+      'function',
+      field('name', $.identifier),
+      field('parameters', $.parameter_list),
+      field('body', $.block_statement)
+    ),
+
     parameter_list: $ => seq(
       '(',
       optional(seq(
-        $.identifier,
-        repeat(seq(',', $.identifier))
+        choice($.identifier, $.varargs),
+        repeat(seq(',', choice($.identifier, $.varargs)))
       )),
       ')'
     ),
+
+    varargs: $ => '...',
 
     // Control flow statements
     if_statement: $ => prec.right(seq(
@@ -76,28 +106,38 @@ module.exports = grammar({
       ')',
       field('then', choice(
         $.variable_declaration,
+        $.local_variable_declaration,
         $.function_declaration,
+        $.local_function_declaration,
         $.if_statement,
         $.while_statement,
         $.for_statement,
+        $.generic_for_statement,
         $.numeric_for_statement,
         $.repeat_statement,
         $.expression_statement,
         $.block_statement,
         $.return_statement,
+        $.break_statement,
+        $.continue_statement,
         $.empty_statement
       )),
       optional(seq('else', field('else', choice(
         $.variable_declaration,
+        $.local_variable_declaration,
         $.function_declaration,
+        $.local_function_declaration,
         $.if_statement,
         $.while_statement,
         $.for_statement,
+        $.generic_for_statement,
         $.numeric_for_statement,
         $.repeat_statement,
         $.expression_statement,
         $.block_statement,
         $.return_statement,
+        $.break_statement,
+        $.continue_statement,
         $.empty_statement
       ))))
     )),
@@ -109,15 +149,20 @@ module.exports = grammar({
       ')',
       field('body', choice(
         $.variable_declaration,
+        $.local_variable_declaration,
         $.function_declaration,
+        $.local_function_declaration,
         $.if_statement,
         $.while_statement,
         $.for_statement,
+        $.generic_for_statement,
         $.numeric_for_statement,
         $.repeat_statement,
         $.expression_statement,
         $.block_statement,
         $.return_statement,
+        $.break_statement,
+        $.continue_statement,
         $.empty_statement
       ))
     ),
@@ -143,16 +188,54 @@ module.exports = grammar({
       ')',
       field('body', choice(
         $.variable_declaration,
+        $.local_variable_declaration,
         $.function_declaration,
+        $.local_function_declaration,
         $.if_statement,
         $.while_statement,
         $.for_statement,
+        $.generic_for_statement,
+        $.numeric_for_statement,
+        $.repeat_statement,
         $.expression_statement,
         $.block_statement,
         $.return_statement,
+        $.break_statement,
+        $.continue_statement,
         $.empty_statement
       ))
     )),
+
+    // Generic for loop: for k, v in iterator do ... end
+    generic_for_statement: $ => seq(
+      'for',
+      field('variables', seq(
+        $.identifier,
+        optional(seq(',', $.identifier))
+      )),
+      'in',
+      field('iterator', $._expression_base),
+      'do',
+      field('body', repeat(choice(
+        $.variable_declaration,
+        $.local_variable_declaration,
+        $.function_declaration,
+        $.local_function_declaration,
+        $.if_statement,
+        $.while_statement,
+        $.for_statement,
+        $.generic_for_statement,
+        $.numeric_for_statement,
+        $.repeat_statement,
+        $.expression_statement,
+        $.block_statement,
+        $.return_statement,
+        $.break_statement,
+        $.continue_statement,
+        $.empty_statement
+      ))),
+      'end'
+    ),
 
     // Numeric for loop: for i = start, stop[, step] do ... end
     numeric_for_statement: $ => seq(
@@ -166,15 +249,20 @@ module.exports = grammar({
       'do',
       field('body', repeat(choice(
         $.variable_declaration,
+        $.local_variable_declaration,
         $.function_declaration,
+        $.local_function_declaration,
         $.if_statement,
         $.while_statement,
         $.for_statement,
+        $.generic_for_statement,
         $.numeric_for_statement,
         $.repeat_statement,
         $.expression_statement,
         $.block_statement,
         $.return_statement,
+        $.break_statement,
+        $.continue_statement,
         $.empty_statement
       ))),
       'end'
@@ -185,15 +273,20 @@ module.exports = grammar({
       'repeat',
       field('body', repeat(choice(
         $.variable_declaration,
+        $.local_variable_declaration,
         $.function_declaration,
+        $.local_function_declaration,
         $.if_statement,
         $.while_statement,
         $.for_statement,
+        $.generic_for_statement,
         $.numeric_for_statement,
         $.repeat_statement,
         $.expression_statement,
         $.block_statement,
         $.return_statement,
+        $.break_statement,
+        $.continue_statement,
         $.empty_statement
       ))),
       'until',
@@ -206,6 +299,10 @@ module.exports = grammar({
       ';'
     ),
 
+    break_statement: $ => seq('break', ';'),
+
+    continue_statement: $ => seq('continue', ';'),
+
     expression_statement: $ => seq(
       $._expression_base,
       ';'
@@ -215,15 +312,20 @@ module.exports = grammar({
       '{',
       repeat(choice(
         $.variable_declaration,
+        $.local_variable_declaration,
         $.function_declaration,
+        $.local_function_declaration,
         $.if_statement,
         $.while_statement,
         $.for_statement,
+        $.generic_for_statement,
         $.numeric_for_statement,
         $.repeat_statement,
         $.expression_statement,
         $.block_statement,
         $.return_statement,
+        $.break_statement,
+        $.continue_statement,
         $.empty_statement,
         $.comment
       )),
@@ -244,8 +346,10 @@ module.exports = grammar({
       $.multiplicative_expression,
       $.unary_expression,
       $.call_expression,
+      $.method_call_expression,
       $.member_expression,
       $.subscript_expression,
+      $.function_expression,
       $.object_literal,
       $.array_literal,
       $.identifier,
@@ -253,6 +357,7 @@ module.exports = grammar({
       $.string_literal,
       $.boolean_literal,
       $.null_literal,
+      $.varargs,
       seq('(', $._expression_base, ')')
     ),
 
@@ -312,6 +417,13 @@ module.exports = grammar({
       field('arguments', $.argument_list)
     )),
 
+    method_call_expression: $ => prec.left(10, seq(
+      field('object', $._expression_base),
+      ':',
+      field('method', $.identifier),
+      field('arguments', $.argument_list)
+    )),
+
     member_expression: $ => prec.left(10, seq(
       field('object', $._expression_base),
       '.',
@@ -324,6 +436,12 @@ module.exports = grammar({
       field('index', $._expression_base),
       ']'
     )),
+
+    function_expression: $ => seq(
+      'function',
+      field('parameters', $.parameter_list),
+      field('body', $.block_statement)
+    ),
 
     argument_list: $ => seq(
       '(',
@@ -412,7 +530,10 @@ module.exports = grammar({
     // Handle potential ambiguities
     [$.assignment_expression, $.conditional_expression],
     [$.call_expression, $.member_expression],
+    [$.call_expression, $.method_call_expression],
+    [$.member_expression, $.method_call_expression],
     [$.block_statement, $.object_literal],
+    [$.object_member, $._expression_base],
     [$.expression]
   ],
 

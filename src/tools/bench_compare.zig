@@ -233,15 +233,25 @@ fn benchmarkThroughput(allocator: std.mem.Allocator, name: []const u8, source: [
     else
         try grove.Languages.json.get();
 
-    var parser = try grove.Parser.init(allocator);
+    // Use a tracking GPA to measure memory usage
+    var tracking_gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = tracking_gpa.deinit();
+    const tracking_allocator = tracking_gpa.allocator();
+
+    var parser = try grove.Parser.init(tracking_allocator);
     defer parser.deinit();
     try parser.setLanguage(language);
 
     const start_time = std.time.nanoTimestamp();
     var total_bytes: u64 = 0;
+    var peak_memory: usize = 0;
 
     for (0..iterations) |_| {
         var tree = try parser.parseUtf8(null, source);
+        const current_memory = tracking_gpa.total_requested_bytes;
+        if (current_memory > peak_memory) {
+            peak_memory = current_memory;
+        }
         tree.deinit();
         total_bytes += source.len;
     }
@@ -251,12 +261,13 @@ fn benchmarkThroughput(allocator: std.mem.Allocator, name: []const u8, source: [
     const duration_s = duration_ns / 1_000_000_000.0;
     const throughput_bps = @as(f64, @floatFromInt(total_bytes)) / duration_s;
     const throughput_mbps = throughput_bps / (1024.0 * 1024.0);
+    const memory_mb = @as(f64, @floatFromInt(peak_memory)) / (1024.0 * 1024.0);
 
     return BenchmarkResult{
         .name = name, // Don't dupe, just use the string literal
         .throughput_mbps = throughput_mbps,
         .latency_ms = (duration_s * 1000.0) / @as(f64, @floatFromInt(iterations)),
-        .memory_mb = 0.0, // TODO: Add memory tracking
+        .memory_mb = memory_mb,
         .timestamp = std.time.timestamp(),
     };
 }
@@ -271,7 +282,12 @@ fn benchmarkIncremental(allocator: std.mem.Allocator, name: []const u8) !Benchma
     else
         try grove.Languages.zig.get();
 
-    var parser = try grove.Parser.init(allocator);
+    // Use a tracking GPA to measure memory usage
+    var tracking_gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = tracking_gpa.deinit();
+    const tracking_allocator = tracking_gpa.allocator();
+
+    var parser = try grove.Parser.init(tracking_allocator);
     defer parser.deinit();
     try parser.setLanguage(language);
 
@@ -280,9 +296,14 @@ fn benchmarkIncremental(allocator: std.mem.Allocator, name: []const u8) !Benchma
     defer tree.deinit();
 
     const start_time = std.time.nanoTimestamp();
+    var peak_memory: usize = 0;
 
     for (0..iterations) |_| {
         var new_tree = try parser.parseUtf8(&tree, edit_source);
+        const current_memory = tracking_gpa.total_requested_bytes;
+        if (current_memory > peak_memory) {
+            peak_memory = current_memory;
+        }
         new_tree.deinit();
     }
 
@@ -294,12 +315,13 @@ fn benchmarkIncremental(allocator: std.mem.Allocator, name: []const u8) !Benchma
     // Estimate throughput based on incremental parsing efficiency
     const source_size = edit_source.len;
     const throughput_mbps = (@as(f64, @floatFromInt(source_size * iterations)) / (1024.0 * 1024.0)) / duration_s;
+    const memory_mb = @as(f64, @floatFromInt(peak_memory)) / (1024.0 * 1024.0);
 
     return BenchmarkResult{
         .name = name, // Don't dupe, just use the string literal
         .throughput_mbps = throughput_mbps,
         .latency_ms = avg_latency_ms,
-        .memory_mb = 0.0,
+        .memory_mb = memory_mb,
         .timestamp = std.time.timestamp(),
     };
 }

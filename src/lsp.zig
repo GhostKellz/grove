@@ -179,22 +179,51 @@ pub const LanguageServer = struct {
     }
 
     /// Find definition of symbol at position
+    /// Uses Tree-sitter queries to locate function/variable definitions generically
     pub fn gotoDefinition(self: *LanguageServer, source: []const u8, position: Position) !?Location {
         var tree = try self.parseDocument(source);
         defer tree.deinit();
 
         const grove_point = position.toGrovePoint();
-        const analysis = try grove.Semantic.analyzePosition(
-            self.allocator,
-            tree.rootNode().?,
-            grove_point.row,
-            grove_point.column,
-            // TODO: Need to convert grove.Language to Languages enum
-            .typescript // Placeholder
-        );
+        const root = tree.rootNode() orelse return null;
 
-        // TODO: Implement actual definition finding logic
-        _ = analysis;
+        // Find the node at the cursor position
+        const node_at_cursor = root.descendantForPointRange(grove_point, grove_point) orelse return null;
+
+        // If it's an identifier, search for its definition
+        const node_text = node_at_cursor.text(source) orelse return null;
+        const identifier_name = if (std.mem.eql(u8, node_at_cursor.kind(), "identifier"))
+            node_text
+        else
+            return null;
+
+        // Walk the tree looking for definitions (function_declaration, variable_declaration, etc.)
+        var cursor = try grove.TreeCursor.init(root);
+        defer cursor.deinit();
+
+        while (cursor.nextNode()) |node| {
+            const kind = node.kind();
+            // Generic pattern matching for common definition node types
+            const is_definition = std.mem.indexOf(u8, kind, "declaration") != null or
+                                std.mem.indexOf(u8, kind, "definition") != null;
+
+            if (is_definition) {
+                // Check if this definition matches our identifier
+                const def_name = node.childByFieldName("name") orelse continue;
+                const def_text = def_name.text(source) orelse continue;
+
+                if (std.mem.eql(u8, identifier_name, def_text)) {
+                    return Location{
+                        .uri = "", // Caller must provide URI
+                        .range = Range{
+                            .start = Position.fromGrovePoint(def_name.startPosition()),
+                            .end = Position.fromGrovePoint(def_name.endPosition()),
+                        },
+                    };
+                }
+            }
+        }
+
         return null;
     }
 
@@ -230,22 +259,103 @@ pub const LanguageServer = struct {
     }
 
     /// Get completions at position
+    /// Extracts identifiers from the tree to provide basic completion suggestions
     pub fn completion(self: *LanguageServer, source: []const u8, position: Position) ![]CompletionItem {
-        _ = self;
-        _ = source;
-        _ = position;
+        _ = position; // TODO: Use position to filter completions by scope
 
-        // TODO: Implement completion logic using semantic analysis
-        // This would analyze the current scope and provide relevant completions
-        return &.{};
+        var tree = try self.parseDocument(source);
+        defer tree.deinit();
+
+        const root = tree.rootNode() orelse return &.{};
+        var completion_list = std.ArrayList(CompletionItem).init(self.allocator);
+        errdefer completion_list.deinit();
+
+        var seen_identifiers = std.StringHashMap(void).init(self.allocator);
+        defer seen_identifiers.deinit();
+
+        // Walk the tree and collect unique identifiers
+        var cursor = try grove.TreeCursor.init(root);
+        defer cursor.deinit();
+
+        while (cursor.nextNode()) |node| {
+            const kind = node.kind();
+
+            // Collect function and variable names
+            if (std.mem.indexOf(u8, kind, "function") != null or
+                std.mem.indexOf(u8, kind, "variable") != null or
+                std.mem.indexOf(u8, kind, "class") != null)
+            {
+                const name_node = node.childByFieldName("name") orelse continue;
+                const name_text = name_node.text(source) orelse continue;
+
+                // Skip if already seen
+                if (seen_identifiers.contains(name_text)) continue;
+
+                try seen_identifiers.put(name_text, {});
+
+                const completion_kind: CompletionItemKind = if (std.mem.indexOf(u8, kind, "function") != null)
+                    .function
+                else if (std.mem.indexOf(u8, kind, "class") != null)
+                    .class
+                else
+                    .variable;
+
+                try completion_list.append(.{
+                    .label = name_text,
+                    .kind = completion_kind,
+                    .detail = try std.fmt.allocPrint(self.allocator, "{s}", .{kind}),
+                });
+            }
+        }
+
+        return try completion_list.toOwnedSlice();
     }
 
     /// Format document
+    /// Provides basic formatting by traversing the syntax tree and re-indenting based on nesting depth
     pub fn formatDocument(self: *LanguageServer, source: []const u8) ![]const u8 {
-        _ = self;
-        // TODO: Implement formatting using Tree-sitter
-        // For now, just return the source unchanged
-        return source;
+        var tree = try self.parseDocument(source);
+        defer tree.deinit();
+
+        const root = tree.rootNode() orelse return source;
+
+        // Simple formatting: rebuild source with consistent indentation
+        var formatted = std.ArrayList(u8).init(self.allocator);
+        errdefer formatted.deinit();
+
+        var current_line: u32 = 0;
+        var indent_level: usize = 0;
+        const indent_str = "    "; // 4 spaces
+
+        var cursor = try grove.TreeCursor.init(root);
+        defer cursor.deinit();
+
+        while (cursor.nextNode()) |node| {
+            const start_pos = node.startPosition();
+
+            // Add newline and indentation for new lines
+            if (start_pos.row > current_line) {
+                try formatted.append('\n');
+                current_line = start_pos.row;
+
+                // Add indentation based on depth
+                const depth = node.depth();
+                indent_level = @min(depth, 20); // Cap at 20 levels
+                for (0..indent_level) |_| {
+                    try formatted.appendSlice(indent_str);
+                }
+            }
+
+            // Append node text
+            if (node.childCount() == 0) { // Only append leaf nodes
+                if (node.text(source)) |text| {
+                    try formatted.appendSlice(text);
+                    try formatted.append(' '); // Add space between tokens
+                }
+            }
+        }
+
+        return try formatted.toOwnedSlice();
     }
 
     /// Get diagnostics (syntax errors, warnings)

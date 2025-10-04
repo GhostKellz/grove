@@ -1,0 +1,269 @@
+==================
+Local variable declaration
+==================
+
+local x = 42;
+
+---
+
+(source_file
+  (local_variable_declaration
+    name: (identifier)
+    value: (number_literal)))
+
+==================
+Local function declaration
+==================
+
+local function test() {
+  return 42;
+}
+
+---
+
+(source_file
+  (local_function_declaration
+    name: (identifier)
+    parameters: (parameter_list)
+    body: (block_statement
+      (return_statement (number_literal)))))
+
+==================
+Generic for loop with single variable
+==================
+
+for k in pairs(table) do
+  print(k);
+end
+
+---
+
+(source_file
+  (generic_for_statement
+    variables: (identifier)
+    iterator: (call_expression
+      function: (identifier)
+      arguments: (argument_list (identifier)))
+    body: (expression_statement
+      (call_expression
+        function: (identifier)
+        arguments: (argument_list (identifier))))))
+
+==================
+Generic for loop with two variables
+==================
+
+for k, v in pairs(table) do
+  print(k, v);
+end
+
+---
+
+(source_file
+  (generic_for_statement
+    variables: (identifier)
+    variables: (identifier)
+    iterator: (call_expression
+      function: (identifier)
+      arguments: (argument_list (identifier)))
+    body: (expression_statement
+      (call_expression
+        function: (identifier)
+        arguments: (argument_list (identifier) (identifier))))))
+
+==================
+Anonymous function expression
+==================
+
+var callback = function(x, y) {
+  return x + y;
+};
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (function_expression
+      parameters: (parameter_list (identifier) (identifier))
+      body: (block_statement
+        (return_statement
+          (additive_expression
+            (identifier)
+            (identifier)))))))
+
+==================
+Function with varargs
+==================
+
+function test(a, b, ...) {
+  return a;
+}
+
+---
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    parameters: (parameter_list
+      (identifier)
+      (identifier)
+      (varargs))
+    body: (block_statement
+      (return_statement (identifier)))))
+
+==================
+Method call expression
+==================
+
+obj:method(arg1, arg2);
+
+---
+
+(source_file
+  (expression_statement
+    (method_call_expression
+      object: (identifier)
+      method: (identifier)
+      arguments: (argument_list (identifier) (identifier)))))
+
+==================
+Break statement
+==================
+
+while (true) {
+  break;
+}
+
+---
+
+(source_file
+  (while_statement
+    condition: (boolean_literal)
+    body: (block_statement
+      (break_statement))))
+
+==================
+Continue statement
+==================
+
+for i = 1, 10 do
+  continue;
+end
+
+---
+
+(source_file
+  (numeric_for_statement
+    variable: (identifier)
+    start: (number_literal)
+    stop: (number_literal)
+    body: (continue_statement)))
+
+==================
+Nested local functions
+==================
+
+local function outer() {
+  local function inner() {
+    return 42;
+  }
+  return inner();
+}
+
+---
+
+(source_file
+  (local_function_declaration
+    name: (identifier)
+    parameters: (parameter_list)
+    body: (block_statement
+      (local_function_declaration
+        name: (identifier)
+        parameters: (parameter_list)
+        body: (block_statement
+          (return_statement (number_literal))))
+      (return_statement
+        (call_expression
+          function: (identifier)
+          arguments: (argument_list))))))
+
+==================
+Chained method calls
+==================
+
+obj:method1():method2():method3();
+
+---
+
+(source_file
+  (expression_statement
+    (method_call_expression
+      object: (method_call_expression
+        object: (method_call_expression
+          object: (identifier)
+          method: (identifier)
+          arguments: (argument_list))
+        method: (identifier)
+        arguments: (argument_list))
+      method: (identifier)
+      arguments: (argument_list))))
+
+==================
+Anonymous function as callback
+==================
+
+map(arr, function(x) {
+  return x * 2;
+});
+
+---
+
+(source_file
+  (expression_statement
+    (call_expression
+      function: (identifier)
+      arguments: (argument_list
+        (identifier)
+        (function_expression
+          parameters: (parameter_list (identifier))
+          body: (block_statement
+            (return_statement
+              (multiplicative_expression
+                (identifier)
+                (number_literal)))))))))
+
+==================
+Local and global mix
+==================
+
+var global = 1;
+local local_var = 2;
+
+function global_func() {
+  return global;
+}
+
+local function local_func() {
+  return local_var;
+}
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (number_literal))
+  (local_variable_declaration
+    name: (identifier)
+    value: (number_literal))
+  (function_declaration
+    name: (identifier)
+    parameters: (parameter_list)
+    body: (block_statement
+      (return_statement (identifier))))
+  (local_function_declaration
+    name: (identifier)
+    parameters: (parameter_list)
+    body: (block_statement
+      (return_statement (identifier)))))

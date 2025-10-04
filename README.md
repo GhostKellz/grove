@@ -43,9 +43,10 @@ Grove ships with **14 production-ready grammars**, all compiled against tree-sit
 
 - **Parser source**: `vendor/tree-sitter-ghostlang/src/parser.c` (statically linked into Grove builds)
 - **Tree-sitter queries**: `vendor/tree-sitter-ghostlang/queries/` covering highlights, locals, textobjects, and injections
-- **Control flow**: Numeric `for` loops (`for i = 1, 10[, step] do...end`) and `repeat...until` blocks now supported
+- **Phase A features**: `local` variables/functions, generic `for k, v in` loops, anonymous functions, varargs `...`, method call syntax `obj:method()`, `break`/`continue` statements
+- **Control flow**: Numeric `for` loops (`for i = 1, 10[, step] do...end`), `repeat...until` blocks, and generic iterator loops
 - **File associations**: `.ghost`, `.gza` for Grim plugin and Ghostlang script workflows
-- **Grammar tests**: 16/16 tree-sitter corpus tests passing (100% coverage)
+- **Grammar tests**: 29/29 tree-sitter corpus tests passing (100% coverage)
 
 ## Project Status
 

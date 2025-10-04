@@ -4,6 +4,7 @@
 ; Keywords
 [
   "var"
+  "local"
   "function"
   "if"
   "else"
@@ -15,6 +16,8 @@
   "repeat"
   "until"
   "return"
+  "break"
+  "continue"
 ] @keyword
 
 ; Operators
@@ -39,7 +42,6 @@
   "||"
   "!"
   "?"
-  ":"
 ] @operator
 
 ; Punctuation
@@ -47,6 +49,7 @@
   ";"
   ","
   "."
+  ":"
 ] @punctuation.delimiter
 
 ; Brackets
@@ -63,6 +66,9 @@
 (function_declaration
   name: (identifier) @function)
 
+(local_function_declaration
+  name: (identifier) @function)
+
 (call_expression
   function: (identifier) @function.call)
 
@@ -70,12 +76,25 @@
   function: (member_expression
     property: (identifier) @function.call))
 
+; Method calls
+(method_call_expression
+  method: (identifier) @function.call)
+
+; Anonymous functions
+(function_expression) @function
+
 ; Parameters
 (parameter_list
   (identifier) @parameter)
 
+; Varargs
+(varargs) @parameter
+
 ; Variables
 (variable_declaration
+  name: (identifier) @variable)
+
+(local_variable_declaration
   name: (identifier) @variable)
 
 (assignment_expression
@@ -84,6 +103,9 @@
 ; Loop control variables
 (numeric_for_statement
   variable: (identifier) @variable)
+
+(generic_for_statement
+  variables: (identifier) @variable)
 
 (for_statement
   variable: (identifier) @variable)
