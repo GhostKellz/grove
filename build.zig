@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_source = b.path("vendor/tree-sitter/lib/src/lib.c");
     const json_grammar_source = b.path("vendor/grammars/json/parser.c");
     const zig_grammar_source = b.path("vendor/grammars/zig/parser.c");
-    const ghostlang_grammar_source = b.path("vendor/grammars/ghostlang/parser.c");
+    const ghostlang_grammar_source = b.path("vendor/tree-sitter-ghostlang/src/parser.c");
     const typescript_grammar_source = b.path("vendor/grammars/typescript/parser.c");
     const typescript_scanner_source = b.path("vendor/grammars/typescript/scanner.c");
     const tsx_grammar_source = b.path("vendor/grammars/tsx/parser.c");

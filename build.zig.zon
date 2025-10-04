@@ -74,9 +74,10 @@
         "build.zig",
         "build.zig.zon",
         "src",
-        "vendor/tree-sitter",      // Tree-sitter runtime (lib.c + headers)
-        "vendor/tree-sitter-rust", // Rust grammar (parser.c + scanner.c)
-        "vendor/grammars",         // Other prebuilt grammar parsers & scanners
+        "vendor/tree-sitter",           // Tree-sitter runtime (lib.c + headers)
+        "vendor/tree-sitter-rust",      // Rust grammar (parser.c + scanner.c)
+        "vendor/tree-sitter-ghostlang", // Ghostlang grammar (parser.c)
+        "vendor/grammars",              // Other prebuilt grammar parsers & scanners
         "LICENSE",
         "README.md",
     },

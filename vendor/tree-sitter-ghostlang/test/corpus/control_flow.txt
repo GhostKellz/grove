@@ -1,0 +1,251 @@
+====================================
+Numeric for loop - basic
+====================================
+
+for i = 1, 10 do
+    log(i);
+end
+
+---
+
+(source_file
+  (numeric_for_statement
+    variable: (identifier)
+    start: (number_literal)
+    stop: (number_literal)
+    body: (expression_statement
+      (call_expression
+        function: (identifier)
+        arguments: (argument_list (identifier))))))
+
+====================================
+Numeric for loop - with step
+====================================
+
+for i = 0, 100, 5 do
+    log(i);
+end
+
+---
+
+(source_file
+  (numeric_for_statement
+    variable: (identifier)
+    start: (number_literal)
+    stop: (number_literal)
+    step: (number_literal)
+    body: (expression_statement
+      (call_expression
+        function: (identifier)
+        arguments: (argument_list (identifier))))))
+
+====================================
+Numeric for loop - negative step
+====================================
+
+for i = 10, 1, -1 do
+    log(i);
+end
+
+---
+
+(source_file
+  (numeric_for_statement
+    variable: (identifier)
+    start: (number_literal)
+    stop: (number_literal)
+    step: (unary_expression (number_literal))
+    body: (expression_statement
+      (call_expression
+        function: (identifier)
+        arguments: (argument_list (identifier))))))
+
+====================================
+Numeric for loop - nested
+====================================
+
+for i = 1, 5 do
+    for j = 1, 3 do
+        log(i + j);
+    end
+end
+
+---
+
+(source_file
+  (numeric_for_statement
+    variable: (identifier)
+    start: (number_literal)
+    stop: (number_literal)
+    body: (numeric_for_statement
+      variable: (identifier)
+      start: (number_literal)
+      stop: (number_literal)
+      body: (expression_statement
+        (call_expression
+          function: (identifier)
+          arguments: (argument_list
+            (additive_expression
+              (identifier)
+              (identifier))))))))
+
+====================================
+Numeric for loop - using variable in body
+====================================
+
+var sum = 0;
+for i = 1, 100 do
+    sum = sum + i;
+end
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (number_literal))
+  (numeric_for_statement
+    variable: (identifier)
+    start: (number_literal)
+    stop: (number_literal)
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (additive_expression
+          (identifier)
+          (identifier))))))
+
+====================================
+Repeat until loop - basic
+====================================
+
+var x = 0;
+repeat
+    x = x + 1;
+until x >= 5
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (number_literal))
+  (repeat_statement
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (additive_expression
+          (identifier)
+          (number_literal))))
+    condition: (relational_expression
+      (identifier)
+      (number_literal))))
+
+====================================
+Repeat until loop - multiple statements
+====================================
+
+var count = 0;
+var total = 0;
+repeat
+    count = count + 1;
+    total = total + count;
+until count == 10
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (number_literal))
+  (variable_declaration
+    name: (identifier)
+    value: (number_literal))
+  (repeat_statement
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (additive_expression
+          (identifier)
+          (number_literal))))
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (additive_expression
+          (identifier)
+          (identifier))))
+    condition: (equality_expression
+      (identifier)
+      (number_literal))))
+
+====================================
+Repeat until loop - nested
+====================================
+
+var x = 0;
+repeat
+    var y = 0;
+    repeat
+        y = y + 1;
+    until y >= 3
+    x = x + 1;
+until x >= 2
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (number_literal))
+  (repeat_statement
+    body: (variable_declaration
+      name: (identifier)
+      value: (number_literal))
+    body: (repeat_statement
+      body: (expression_statement
+        (assignment_expression
+          left: (identifier)
+          right: (additive_expression
+            (identifier)
+            (number_literal))))
+      condition: (relational_expression
+        (identifier)
+        (number_literal)))
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (additive_expression
+          (identifier)
+          (number_literal))))
+    condition: (relational_expression
+      (identifier)
+      (number_literal))))
+
+====================================
+Repeat until - with function call
+====================================
+
+var done = false;
+repeat
+    processItem();
+    done = checkComplete();
+until done
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (boolean_literal))
+  (repeat_statement
+    body: (expression_statement
+      (call_expression
+        function: (identifier)
+        arguments: (argument_list)))
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (call_expression
+          function: (identifier)
+          arguments: (argument_list))))
+    condition: (identifier)))
