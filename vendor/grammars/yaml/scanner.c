@@ -1,5 +1,6 @@
 #include "tree_sitter/array.h"
 #include "tree_sitter/parser.h"
+#include <assert.h>
 
 #define _str(x) #x
 #define _file(x) _str(schema.x.c)
