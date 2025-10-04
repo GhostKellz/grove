@@ -58,15 +58,6 @@ jobs:
     - name: Build Grove core
       run: zig build
 
-    - name: Test tree-sitter parsing
-      run: zig build test --filter "tree-sitter"
-
-    - name: Test Ghostlang grammar
-      run: zig build test --filter "ghostlang"
-
-    - name: Run utility tests
-      run: zig build test --filter "utilities"
-
     - name: Run all tests
       run: zig build test
 
