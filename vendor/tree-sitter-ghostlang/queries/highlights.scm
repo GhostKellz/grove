@@ -129,7 +129,7 @@
 
 ; Built-in functions (common editor APIs)
 ((identifier) @function.builtin
- (#match? @function.builtin "^(getCurrentLine|getLineText|setLineText|insertText|getAllText|replaceAllText|getCursorPosition|setCursorPosition|getSelection|setSelection|getSelectedText|replaceSelection|getFilename|getFileLanguage|isModified|notify|log|prompt|findAll|replaceAll|split|join|substring|indexOf|replace|createArray|arrayPush|arrayLength|arrayGet|createObject|objectSet|objectGet)$"))
+ (#match? @function.builtin "^(getCurrentLine|getLineText|setLineText|insertText|getAllText|replaceAllText|getCursorPosition|setCursorPosition|getSelection|setSelection|getSelectedText|replaceSelection|getFilename|getFileLanguage|isModified|notify|log|prompt|findAll|replaceAll|split|join|substring|indexOf|replace|createArray|arrayPush|arraySet|arrayPop|arrayLength|arrayGet|createObject|objectSet|objectGet|objectKeys|pairs|ipairs)$"))
 
 ; String interpolation and escapes
 (escape_sequence) @string.escape
