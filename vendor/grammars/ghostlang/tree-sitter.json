@@ -1,0 +1,26 @@
+{
+  "grammars": [
+    {
+      "name": "ghostlang",
+      "scope": "source.ghostlang",
+      "file-types": ["gza", "ghost"],
+      "highlights": ["queries/highlights.scm"],
+      "locals": ["queries/locals.scm"],
+      "injections": ["queries/injections.scm"],
+      "tags": ["queries/textobjects.scm"]
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Tree-sitter grammar for Ghostlang v0.1.0 - Dual Lua/C-style scripting language",
+    "authors": [
+      {
+        "name": "Ghostlang Contributors"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/ghostlang/tree-sitter-ghostlang"
+    }
+  }
+}

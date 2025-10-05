@@ -1,18 +1,20 @@
-; Syntax highlighting queries for Ghostlang
+; Syntax highlighting queries for Ghostlang v0.1.0
 ; These queries define how Grove should highlight different syntax elements
 
-; Keywords
+; Keywords - C-style and Lua-style
 [
   "var"
   "local"
   "function"
   "if"
+  "then"
+  "elseif"
   "else"
   "while"
-  "for"
-  "in"
   "do"
   "end"
+  "for"
+  "in"
   "repeat"
   "until"
   "return"
@@ -20,13 +22,15 @@
   "continue"
 ] @keyword
 
-; Operators
+; Lua-style logical operators (also keywords)
 [
-  "="
-  "+="
-  "-="
-  "*="
-  "/="
+  "and"
+  "or"
+  "not"
+] @keyword.operator
+
+; Operators - C-style and Lua-style
+[
   "+"
   "-"
   "*"
@@ -34,6 +38,7 @@
   "%"
   "=="
   "!="
+  "~="
   "<"
   ">"
   "<="
@@ -42,14 +47,19 @@
   "||"
   "!"
   "?"
+  ":"
+  ".."
 ] @operator
+
+; Assignment operators (shown as string in AST due to aliasing)
+(assignment_expression
+  operator: (string) @operator)
 
 ; Punctuation
 [
   ";"
   ","
   "."
-  ":"
 ] @punctuation.delimiter
 
 ; Brackets
@@ -66,9 +76,6 @@
 (function_declaration
   name: (identifier) @function)
 
-(local_function_declaration
-  name: (identifier) @function)
-
 (call_expression
   function: (identifier) @function.call)
 
@@ -76,39 +83,16 @@
   function: (member_expression
     property: (identifier) @function.call))
 
-; Method calls
-(method_call_expression
-  method: (identifier) @function.call)
-
-; Anonymous functions
-(function_expression) @function
-
 ; Parameters
 (parameter_list
   (identifier) @parameter)
-
-; Varargs
-(varargs) @parameter
 
 ; Variables
 (variable_declaration
   name: (identifier) @variable)
 
-(local_variable_declaration
-  name: (identifier) @variable)
-
 (assignment_expression
   left: (identifier) @variable)
-
-; Loop control variables
-(numeric_for_statement
-  variable: (identifier) @variable)
-
-(generic_for_statement
-  variables: (identifier) @variable)
-
-(for_statement
-  variable: (identifier) @variable)
 
 ; Properties and methods
 (member_expression
@@ -127,9 +111,9 @@
 ; Comments
 (comment) @comment
 
-; Built-in functions (common editor APIs)
+; Built-in functions - v0.1.0 additions
 ((identifier) @function.builtin
- (#match? @function.builtin "^(getCurrentLine|getLineText|setLineText|insertText|getAllText|replaceAllText|getCursorPosition|setCursorPosition|getSelection|setSelection|getSelectedText|replaceSelection|getFilename|getFileLanguage|isModified|notify|log|prompt|findAll|replaceAll|split|join|substring|indexOf|replace|createArray|arrayPush|arraySet|arrayPop|arrayLength|arrayGet|createObject|objectSet|objectGet|objectKeys|pairs|ipairs)$"))
+ (#match? @function.builtin "^(getCurrentLine|getLineText|setLineText|insertText|getAllText|replaceAllText|getCursorPosition|setCursorPosition|getSelection|setSelection|getSelectedText|replaceSelection|getFilename|getFileLanguage|isModified|notify|log|prompt|findAll|replaceAll|split|join|substring|indexOf|replace|createArray|arrayPush|arrayPop|arrayGet|arraySet|arrayLength|tableInsert|tableRemove|tableConcat|createObject|objectSet|objectGet|objectKeys|pairs|ipairs|stringMatch|stringFind|stringGsub|stringUpper|stringLower|stringFormat)$"))
 
 ; String interpolation and escapes
 (escape_sequence) @string.escape

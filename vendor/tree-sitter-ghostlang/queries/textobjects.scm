@@ -22,10 +22,6 @@
 (while_statement body: (_) @loop.inner)
 (for_statement) @loop.outer
 (for_statement body: (_) @loop.inner)
-(numeric_for_statement) @loop.outer
-(numeric_for_statement body: (_) @loop.inner)
-(repeat_statement) @loop.outer
-(repeat_statement body: (_) @loop.inner)
 
 ; Function calls
 (call_expression) @call.outer
