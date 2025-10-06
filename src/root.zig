@@ -4,6 +4,7 @@ pub const ParseReport = @import("core/parser.zig").ParseReport;
 pub const Tree = @import("core/tree.zig").Tree;
 pub const Node = @import("core/node.zig").Node;
 pub const Point = @import("core/node.zig").Point;
+pub const TreeCursor = @import("core/cursor.zig").TreeCursor;
 pub const Language = @import("language.zig").Language;
 pub const LanguageError = @import("language.zig").LanguageError;
 pub const Languages = @import("languages.zig").Bundled;

@@ -85,4 +85,22 @@ pub const Node = struct {
         if (c.ts_node_is_null(parent_node)) return null;
         return Node.fromRaw(parent_node);
     }
+
+    pub fn descendantForPointRange(self: Node, start: Point, end: Point) ?Node {
+        const start_point = c.TSPoint{ .row = start.row, .column = start.column };
+        const end_point = c.TSPoint{ .row = end.row, .column = end.column };
+        const descendant = c.ts_node_descendant_for_point_range(self.handle, start_point, end_point);
+        if (c.ts_node_is_null(descendant)) return null;
+        return Node.fromRaw(descendant);
+    }
+
+    pub fn childByFieldName(self: Node, field_name: []const u8) ?Node {
+        const child_node = c.ts_node_child_by_field_name(self.handle, field_name.ptr, @intCast(field_name.len));
+        if (c.ts_node_is_null(child_node)) return null;
+        return Node.fromRaw(child_node);
+    }
+
+    pub fn treeWalk(self: Node) !@import("cursor.zig").TreeCursor {
+        return @import("cursor.zig").TreeCursor.init(self);
+    }
 };
