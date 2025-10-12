@@ -16,6 +16,7 @@ extern fn tree_sitter_cmake() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_toml() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_yaml() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_c() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_gshell() callconv(.c) *const c.TSLanguage;
 
 pub const Bundled = enum {
     json,
@@ -32,6 +33,7 @@ pub const Bundled = enum {
     toml,
     yaml,
     c,
+    gshell,
 
     pub fn raw(self: Bundled) *const c.TSLanguage {
         return switch (self) {
@@ -49,6 +51,7 @@ pub const Bundled = enum {
             .toml => tree_sitter_toml(),
             .yaml => tree_sitter_yaml(),
             .c => tree_sitter_c(),
+            .gshell => tree_sitter_gshell(),
         };
     }
 
@@ -100,6 +103,7 @@ pub const Registry = struct {
         try self.register("toml", try Bundled.toml.get());
         try self.register("yaml", try Bundled.yaml.get());
         try self.register("c", try Bundled.c.get());
+        try self.register("gshell", try Bundled.gshell.get());
     }
 
     pub fn registerSharedLibrary(
@@ -188,6 +192,11 @@ test "bundled C language returns non-null pointer" {
     try std.testing.expect(lang.raw() != null);
 }
 
+test "bundled GShell language returns non-null pointer" {
+    const lang = try Bundled.gshell.get();
+    try std.testing.expect(lang.raw() != null);
+}
+
 test "registry can register bundled languages" {
     var registry = Registry.init(std.testing.allocator);
     defer registry.deinit();
@@ -207,4 +216,5 @@ test "registry can register bundled languages" {
     try std.testing.expect(registry.get("toml") != null);
     try std.testing.expect(registry.get("yaml") != null);
     try std.testing.expect(registry.get("c") != null);
+    try std.testing.expect(registry.get("gshell") != null);
 }

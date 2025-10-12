@@ -22,7 +22,7 @@ Grove is a modern Zig wrapper around the Tree-sitter parsing library, focusing o
 
 ## Bundled Grammars
 
-Grove ships with **14 production-ready grammars**, all compiled against tree-sitter 0.25.10 (ABI 15):
+Grove ships with **15 production-ready grammars**, all compiled against tree-sitter 0.25.10 (ABI 15):
 
 - **JSON** – `grove.Languages.json.get()` – Configuration and data files
 - **Zig** – `grove.Languages.zig.get()` – Zig programming language
@@ -38,6 +38,7 @@ Grove ships with **14 production-ready grammars**, all compiled against tree-sit
 - **TOML** – `grove.Languages.toml.get()` – Cargo.toml, pyproject.toml, configs
 - **YAML** – `grove.Languages.yaml.get()` – CI/CD, Kubernetes, Docker Compose
 - **C** – `grove.Languages.c.get()` – C programming language
+- **GShell** – `grove.Languages.gshell.get()` – GShell command syntax
 
 ### Ghostlang Support Snapshot
 
@@ -184,6 +185,39 @@ pub fn main() !void {
 - **Timing & Benchmarks**: `Parser.parseUtf8Timed` returns `ParseReport { tree, duration_ns, bytes }` for profiling. `zig build bench` parses bundled Zig sources and prints throughput, while `zig build bench-latency` samples incremental edits.
 - **Parser Pooling**: `grove.ParserPool` leases configured parsers across threads, eliminating hot-path reinitialisation overhead.
 - **Tree Cloning**: `tree.clone()` creates fast tree copies for undo/redo stacks without re-parsing.
+
+## REPL/Shell Support
+
+Grove includes specialized APIs for interactive shells and REPLs:
+
+- **RealtimeHighlighter**: Sub-5ms highlighting for command-line input with incremental parsing
+- **Command Validation**: Validate commands against PATH with custom validator functions
+- **Completion Context**: Smart completion context detection (command, flag, file, variable)
+- **Error Detection**: Real-time syntax error highlighting as users type
+
+Example usage in a shell:
+```zig
+const grove = @import("grove");
+
+var highlighter = try grove.RealtimeHighlighter.init(
+    allocator,
+    try grove.Languages.gshell.get(),
+    highlight_query,
+);
+defer highlighter.deinit();
+
+// Highlight user input in real-time
+const spans = try highlighter.highlightLine("ls -la | grep test");
+
+// Validate commands
+const validator = struct {
+    fn isValid(cmd: []const u8) bool {
+        return isInPath(cmd); // Your implementation
+    }
+}.isValid;
+
+const results = try grove.validateCommands(allocator, root, source, validator);
+```
 
 ## License
 

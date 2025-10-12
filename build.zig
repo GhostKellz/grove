@@ -55,6 +55,7 @@ pub fn build(b: *std.Build) void {
     const yaml_grammar_source = b.path("vendor/grammars/yaml/parser.c");
     const yaml_scanner_source = b.path("vendor/grammars/yaml/scanner.c");
     const c_grammar_source = b.path("vendor/grammars/c/parser.c");
+    const gshell_grammar_source = b.path("vendor/grammars/gshell/parser.c");
     const tree_sitter_flags = &.{
         "-std=c99",
         "-DTREE_SITTER_STATIC=1",
@@ -101,6 +102,7 @@ pub fn build(b: *std.Build) void {
     mod.addCSourceFile(.{ .file = yaml_grammar_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = yaml_scanner_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = c_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = gshell_grammar_source, .flags = &.{"-std=c99"} });
 
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function
