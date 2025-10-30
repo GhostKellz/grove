@@ -26,6 +26,7 @@ pub const ParserPool = @import("core/pool.zig").ParserPool;
 pub const ParserLease = @import("core/pool.zig").Lease;
 pub const Semantic = @import("semantic.zig");
 pub const LSP = @import("lsp.zig");
+pub const LSPHelpers = LSP.helpers;
 pub const EditBuilder = @import("core/edit.zig").EditBuilder;
 pub const InputEdit = @import("core/edit.zig").InputEdit;
 pub const SyntaxError = @import("core/errors.zig").SyntaxError;

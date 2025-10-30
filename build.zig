@@ -249,6 +249,27 @@ pub fn build(b: *std.Build) void {
     const latency_step = b.step("bench-latency", "Run incremental latency benchmark");
     latency_step.dependOn(&run_latency.step);
 
+    // LSP server example
+    const lsp_example = b.addExecutable(.{
+        .name = "grove-lsp-example",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("examples/lsp_server.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "grove", .module = mod },
+            },
+        }),
+    });
+    lsp_example.addIncludePath(tree_sitter_include);
+    lsp_example.linkLibC();
+
+    const run_lsp_example = b.addRunArtifact(lsp_example);
+    run_lsp_example.step.dependOn(b.getInstallStep());
+
+    const lsp_example_step = b.step("run-example-lsp", "Run LSP server example");
+    lsp_example_step.dependOn(&run_lsp_example.step);
+
     // Just like flags, top level steps are also listed in the `--help` menu.
     //
     // The Zig build system is entirely implemented in userland, which means

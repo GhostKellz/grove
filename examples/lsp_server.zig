@@ -1,331 +1,305 @@
-/// Example LSP server implementation using Grove
-/// This demonstrates how to use grove.lsp module to build a language server
-///
-/// Usage:
-///   zig build-exe examples/lsp_server.zig
-///   ./lsp_server --stdio
-///
-/// This example shows how Ghostls and other LSP servers can leverage Grove's
-/// tree-sitter parsing capabilities for syntax analysis, diagnostics, and code intelligence.
+//! Example: Building a Simple LSP Server with Grove
+//!
+//! This example demonstrates how to use Grove's LSP helpers to build
+//! a minimal Language Server Protocol server with:
+//! - Document symbols
+//! - Diagnostics
+//! - Go-to-definition
+//! - Find references
+//! - Folding ranges
+//! - Semantic tokens
+//!
+//! Run with: zig build run-example-lsp
 
 const std = @import("std");
 const grove = @import("grove");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
+    defer {
+        const leaked = gpa.deinit();
+        if (leaked == .leak) {
+            std.log.err("Memory leak detected!", .{});
+        }
+    }
     const allocator = gpa.allocator();
 
-    // Initialize language server factory
-    const factory = grove.lsp.LanguageServerFactory.init(allocator);
-
-    // Example 1: TypeScript/JavaScript Language Server
-    std.debug.print("=== TypeScript LSP Server Example ===\n", .{});
-    try typeScriptExample(factory);
-
-    // Example 2: Ghostlang Language Server
-    std.debug.print("\n=== Ghostlang LSP Server Example ===\n", .{});
-    try ghostlangExample(factory);
-
-    // Example 3: Low-level LSP utilities
-    std.debug.print("\n=== Low-level LSP Utilities Example ===\n", .{});
-    try lowLevelExample(allocator);
-}
-
-/// Example TypeScript language server operations
-fn typeScriptExample(factory: grove.lsp.LanguageServerFactory) !void {
-    var server = try factory.createTypeScriptServer();
+    // Initialize LSP server
+    var server = try SimpleLSPServer.init(allocator);
     defer server.deinit();
 
-    const typescript_source =
-        \\function greet(name: string): string {
-        \\  return `Hello, ${name}!`;
-        \\}
-        \\
-        \\const message = greet("World");
-        \\console.log(message);
-    ;
-
-    // 1. Get diagnostics (syntax errors)
-    std.debug.print("1. Diagnostics:\n", .{});
-    const diagnostics = try server.diagnostics(typescript_source);
-    defer server.allocator.free(diagnostics);
-
-    if (diagnostics.len == 0) {
-        std.debug.print("   ✓ No syntax errors found\n", .{});
-    } else {
-        for (diagnostics) |diag| {
-            std.debug.print("   ✗ {s} at line {d}:{d}\n", .{
-                diag.message,
-                diag.range.start.line,
-                diag.range.start.character,
-            });
-        }
-    }
-
-    // 2. Get document symbols (outline)
-    std.debug.print("\n2. Document Symbols:\n", .{});
-    const symbols = try server.documentSymbols(typescript_source);
-    defer server.allocator.free(symbols);
-
-    for (symbols) |symbol| {
-        std.debug.print("   • {s} ({s}) at line {d}\n", .{
-            symbol.label,
-            @tagName(symbol.kind),
-            symbol.range.start.line,
-        });
-    }
-
-    // 3. Get folding ranges
-    std.debug.print("\n3. Folding Ranges:\n", .{});
-    const folds = try server.foldingRanges(typescript_source);
-    defer server.allocator.free(folds);
-
-    for (folds) |fold| {
-        std.debug.print("   • Fold lines {d}-{d}\n", .{
-            fold.start_line,
-            fold.end_line,
-        });
-    }
-
-    // 4. Go to definition
-    std.debug.print("\n4. Go to Definition:\n", .{});
-    const cursor_position = grove.lsp.Position{ .line = 4, .character = 18 }; // "greet" call
-    const definition = try server.gotoDefinition(typescript_source, cursor_position);
-
-    if (definition) |def| {
-        std.debug.print("   → Definition found at line {d}:{d}\n", .{
-            def.range.start.line,
-            def.range.start.character,
-        });
-    } else {
-        std.debug.print("   ⨯ No definition found\n", .{});
-    }
-
-    // 5. Hover information
-    std.debug.print("\n5. Hover Info:\n", .{});
-    const hover_text = try server.hover(typescript_source, cursor_position);
-    defer if (hover_text) |text| server.allocator.free(text);
-
-    if (hover_text) |text| {
-        std.debug.print("   {s}\n", .{text});
-    }
-
-    // 6. Completions
-    std.debug.print("\n6. Completions:\n", .{});
-    const completions = try server.completion(typescript_source, cursor_position);
-    defer server.allocator.free(completions);
-
-    for (completions[0..@min(5, completions.len)]) |completion| {
-        std.debug.print("   • {s} ({s})\n", .{
-            completion.label,
-            @tagName(completion.kind),
-        });
-    }
-}
-
-/// Example Ghostlang language server operations
-fn ghostlangExample(factory: grove.lsp.LanguageServerFactory) !void {
-    var server = try factory.createGhostlangServer();
-    defer server.deinit();
-
-    const ghostlang_source =
-        \\-- Ghostlang configuration example
-        \\local function setup_editor()
-        \\    set_option("line_numbers", true)
-        \\    set_option("tab_width", 4)
+    // Example document
+    const source =
+        \\-- Ghostlang example
+        \\function calculateSum(numbers)
+        \\    local total = 0
+        \\    for i, num in ipairs(numbers) do
+        \\        total = total + num
+        \\    end
+        \\    return total
         \\end
         \\
-        \\local config = {
-        \\    theme = "tokyonight",
-        \\    keybindings = {
-        \\        { mode = "n", key = "<leader>w", cmd = ":write<CR>" }
-        \\    }
-        \\}
+        \\function main()
+        \\    local data = {1, 2, 3, 4, 5}
+        \\    local result = calculateSum(data)
+        \\    print("Sum:", result)
+        \\end
         \\
-        \\setup_editor()
-        \\register_config(config)
+        \\-- Invalid syntax for testing diagnostics
+        \\function broken(
+        \\    -- missing closing paren
     ;
 
-    // Parse and analyze Ghostlang code
-    std.debug.print("1. Parsing Ghostlang source...\n", .{});
+    std.log.info("Opening document...", .{});
+    try server.openDocument("file:///example.gza", source);
 
-    const diagnostics = try server.diagnostics(ghostlang_source);
-    defer server.allocator.free(diagnostics);
+    // Demonstrate LSP features
+    std.log.info("\n=== Document Symbols ===", .{});
+    try server.showDocumentSymbols("file:///example.gza");
 
-    if (diagnostics.len == 0) {
-        std.debug.print("   ✓ Valid Ghostlang syntax\n", .{});
-    }
+    std.log.info("\n=== Diagnostics ===", .{});
+    try server.showDiagnostics("file:///example.gza");
 
-    const symbols = try server.documentSymbols(ghostlang_source);
-    defer server.allocator.free(symbols);
+    std.log.info("\n=== Go-to-Definition ===", .{});
+    const position = grove.LSP.Position{ .line = 11, .character = 19 }; // "calculateSum" in main
+    try server.showDefinition("file:///example.gza", position);
 
-    std.debug.print("\n2. Ghostlang Symbols:\n", .{});
-    for (symbols) |symbol| {
-        std.debug.print("   • {s} ({s})\n", .{
-            symbol.label,
-            @tagName(symbol.kind),
-        });
-    }
+    std.log.info("\n=== Find References ===", .{});
+    try server.showReferences("file:///example.gza", "calculateSum");
+
+    std.log.info("\n=== Folding Ranges ===", .{});
+    try server.showFoldingRanges("file:///example.gza");
+
+    std.log.info("\n=== Semantic Tokens ===", .{});
+    try server.showSemanticTokens("file:///example.gza");
 }
 
-/// Example of low-level LSP utilities without LanguageServer abstraction
-fn lowLevelExample(allocator: std.mem.Allocator) !void {
-    const source =
-        \\fn calculate(x: i32, y: i32) i32 {
-        \\    return x + y
-        \\}
-    ;
+/// Simple LSP Server using Grove helpers
+const SimpleLSPServer = struct {
+    allocator: std.mem.Allocator,
+    parser: grove.Parser,
+    language: grove.Language,
+    documents: std.StringHashMap(Document),
 
-    // Parse with grove directly
-    var parser = try grove.Parser.init(allocator);
-    defer parser.deinit();
+    const Document = struct {
+        uri: []const u8,
+        source: []const u8,
+        tree: ?grove.Tree,
+    };
 
-    const language = try grove.Languages.zig.get();
-    try parser.setLanguage(language);
+    pub fn init(allocator: std.mem.Allocator) !SimpleLSPServer {
+        var parser = try grove.Parser.init(allocator);
+        const language = try grove.Languages.ghostlang.get();
+        try parser.setLanguage(language);
 
-    var tree = try parser.parseUtf8(null, source);
-    defer tree.deinit();
-
-    const root = tree.rootNode() orelse return error.EmptyTree;
-
-    // Use LSP utilities
-    std.debug.print("1. Position/Offset Conversion:\n", .{});
-
-    const position = grove.lsp.Position{ .line = 1, .character = 4 };
-    const offset = grove.lsp.Utils.positionToByteOffset(source, position);
-    std.debug.print("   Position line:{d} char:{d} → offset:{d}\n", .{
-        position.line,
-        position.character,
-        offset,
-    });
-
-    const back_to_position = grove.lsp.Utils.byteOffsetToPosition(source, offset);
-    std.debug.print("   Offset:{d} → position line:{d} char:{d}\n", .{
-        offset,
-        back_to_position.line,
-        back_to_position.character,
-    });
-
-    // Find node at position
-    std.debug.print("\n2. Node at Position:\n", .{});
-    const grove_point = position.toGrovePoint();
-    const node_at_pos = root.descendantForPointRange(grove_point, grove_point);
-
-    if (node_at_pos) |node| {
-        std.debug.print("   Node kind: {s}\n", .{node.kind()});
-        std.debug.print("   Node text: {s}\n", .{node.text(source) orelse "<no text>"});
-
-        const node_range = grove.lsp.Range{
-            .start = grove.lsp.Position.fromGrovePoint(node.startPosition()),
-            .end = grove.lsp.Position.fromGrovePoint(node.endPosition()),
+        return .{
+            .allocator = allocator,
+            .parser = parser,
+            .language = language,
+            .documents = std.StringHashMap(Document).init(allocator),
         };
-        std.debug.print("   Range: line:{d}-{d}\n", .{
-            node_range.start.line,
-            node_range.end.line,
+    }
+
+    pub fn deinit(self: *SimpleLSPServer) void {
+        var it = self.documents.valueIterator();
+        while (it.next()) |doc| {
+            if (doc.tree) |*tree| {
+                tree.deinit();
+            }
+            self.allocator.free(doc.uri);
+            self.allocator.free(doc.source);
+        }
+        self.documents.deinit();
+        self.parser.deinit();
+    }
+
+    pub fn openDocument(self: *SimpleLSPServer, uri: []const u8, source: []const u8) !void {
+        const uri_owned = try self.allocator.dupe(u8, uri);
+        errdefer self.allocator.free(uri_owned);
+
+        const source_owned = try self.allocator.dupe(u8, source);
+        errdefer self.allocator.free(source_owned);
+
+        const tree = try self.parser.parseUtf8(null, source_owned);
+
+        try self.documents.put(uri_owned, .{
+            .uri = uri_owned,
+            .source = source_owned,
+            .tree = tree,
         });
     }
 
-    // Extract diagnostics manually
-    std.debug.print("\n3. Manual Diagnostic Collection:\n", .{});
-    var diagnostics = std.ArrayList(grove.lsp.Diagnostic).init(allocator);
-    defer diagnostics.deinit();
+    fn getDocument(self: *SimpleLSPServer, uri: []const u8) ?*Document {
+        return self.documents.getPtr(uri);
+    }
 
-    // Walk tree looking for ERROR nodes
-    var cursor = try grove.TreeCursor.init(root);
-    defer cursor.deinit();
+    pub fn showDocumentSymbols(self: *SimpleLSPServer, uri: []const u8) !void {
+        const doc = self.getDocument(uri) orelse return error.DocumentNotFound;
+        const tree = doc.tree orelse return error.TreeNotParsed;
+        const root = tree.rootNode() orelse return;
 
-    while (cursor.nextNode()) |node| {
-        if (std.mem.eql(u8, node.kind(), "ERROR") or
-            std.mem.eql(u8, node.kind(), "MISSING"))
-        {
-            try diagnostics.append(.{
-                .range = .{
-                    .start = grove.lsp.Position.fromGrovePoint(node.startPosition()),
-                    .end = grove.lsp.Position.fromGrovePoint(node.endPosition()),
-                },
-                .severity = .@"error",
-                .message = "Syntax error detected",
-                .source = "grove-manual",
+        var symbols = try grove.LSP.extractSymbols(
+            self.allocator,
+            root,
+            doc.source,
+            null,
+        );
+        defer {
+            for (symbols.items) |*sym| sym.deinit(self.allocator);
+            symbols.deinit(self.allocator);
+        }
+
+        for (symbols.items) |sym| {
+            std.log.info("  {s} {s} line {}", .{
+                sym.name,
+                @tagName(sym.kind),
+                sym.range.start.line,
+            });
+
+            // Show children (nested symbols)
+            for (sym.children.items) |child| {
+                std.log.info("    └─ {s} {s} line {}", .{
+                    child.name,
+                    @tagName(child.kind),
+                    child.range.start.line,
+                });
+            }
+        }
+    }
+
+    pub fn showDiagnostics(self: *SimpleLSPServer, uri: []const u8) !void {
+        const doc = self.getDocument(uri) orelse return error.DocumentNotFound;
+        const tree = doc.tree orelse return error.TreeNotParsed;
+        const root = tree.rootNode() orelse return;
+
+        var diagnostics = try grove.LSP.collectDiagnostics(
+            self.allocator,
+            root,
+            doc.source,
+        );
+        defer {
+            for (diagnostics.items) |*diag| diag.deinit(self.allocator);
+            diagnostics.deinit(self.allocator);
+        }
+
+        if (diagnostics.items.len == 0) {
+            std.log.info("  No syntax errors found!", .{});
+        } else {
+            for (diagnostics.items) |diag| {
+                std.log.info("  [{}:{}] {s}: {s}", .{
+                    diag.range.start.line,
+                    diag.range.start.character,
+                    @tagName(diag.severity),
+                    diag.message,
+                });
+            }
+        }
+    }
+
+    pub fn showDefinition(self: *SimpleLSPServer, uri: []const u8, position: grove.LSP.Position) !void {
+        const doc = self.getDocument(uri) orelse return error.DocumentNotFound;
+        const tree = doc.tree orelse return error.TreeNotParsed;
+        const root = tree.rootNode() orelse return;
+
+        // Find node at cursor
+        const cursor_node = grove.LSP.findNodeAtPosition(root, position) orelse {
+            std.log.info("  No node at position", .{});
+            return;
+        };
+
+        std.log.info("  Cursor on: {s}", .{cursor_node.kind()});
+
+        // Check if it's an identifier
+        if (std.mem.eql(u8, cursor_node.kind(), "identifier")) {
+            const identifier = cursor_node.text(doc.source) orelse return;
+            std.log.info("  Looking for definition of: {s}", .{identifier});
+
+            // Find definition
+            if (grove.LSP.findDefinition(root, identifier, doc.source)) |def_node| {
+                const range = grove.LSP.nodeToRange(def_node);
+                std.log.info("  ✓ Definition found at line {} ({s})", .{
+                    range.start.line,
+                    def_node.kind(),
+                });
+            } else {
+                std.log.info("  ✗ Definition not found", .{});
+            }
+        }
+    }
+
+    pub fn showReferences(self: *SimpleLSPServer, uri: []const u8, identifier: []const u8) !void {
+        const doc = self.getDocument(uri) orelse return error.DocumentNotFound;
+        const tree = doc.tree orelse return error.TreeNotParsed;
+        const root = tree.rootNode() orelse return;
+
+        var references = try grove.LSP.findReferences(
+            self.allocator,
+            root,
+            identifier,
+            doc.source,
+        );
+        defer references.deinit(self.allocator);
+
+        std.log.info("  Found {} reference(s) to '{s}':", .{ references.items.len, identifier });
+        for (references.items) |ref_node| {
+            const range = grove.LSP.nodeToRange(ref_node);
+            std.log.info("    - line {} column {}", .{
+                range.start.line,
+                range.start.character,
             });
         }
     }
 
-    if (diagnostics.items.len == 0) {
-        std.debug.print("   ✓ No errors found (manual scan)\n", .{});
-    }
-}
+    pub fn showFoldingRanges(self: *SimpleLSPServer, uri: []const u8) !void {
+        const doc = self.getDocument(uri) orelse return error.DocumentNotFound;
+        const tree = doc.tree orelse return error.TreeNotParsed;
+        const root = tree.rootNode() orelse return;
 
-// ============================================================================
-// Bonus: JSON-RPC Message Handling Example
-// ============================================================================
+        var folding = try grove.LSP.extractFoldingRanges(
+            self.allocator,
+            root,
+            doc.source,
+        );
+        defer folding.deinit(self.allocator);
 
-/// Example JSON-RPC message handler for LSP protocol
-/// This shows how to integrate Grove LSP with actual LSP protocol messages
-const JsonRpcHandler = struct {
-    server: grove.lsp.LanguageServer,
-    documents: std.StringHashMap([]const u8),
-
-    pub fn init(allocator: std.mem.Allocator, language: grove.Language) !JsonRpcHandler {
-        return .{
-            .server = try grove.lsp.LanguageServer.init(allocator, language),
-            .documents = std.StringHashMap([]const u8).init(allocator),
-        };
-    }
-
-    pub fn deinit(self: *JsonRpcHandler) void {
-        var it = self.documents.iterator();
-        while (it.next()) |entry| {
-            self.server.allocator.free(entry.key_ptr.*);
-            self.server.allocator.free(entry.value_ptr.*);
+        for (folding.items) |range| {
+            const kind_str = if (range.kind) |k| @tagName(k) else "region";
+            std.log.info("  lines {}-{} ({s})", .{
+                range.start_line,
+                range.end_line,
+                kind_str,
+            });
         }
-        self.documents.deinit();
-        self.server.deinit();
     }
 
-    /// Handle textDocument/didOpen notification
-    pub fn handleDidOpen(self: *JsonRpcHandler, uri: []const u8, text: []const u8) !void {
-        const uri_copy = try self.server.allocator.dupe(u8, uri);
-        const text_copy = try self.server.allocator.dupe(u8, text);
-        try self.documents.put(uri_copy, text_copy);
+    pub fn showSemanticTokens(self: *SimpleLSPServer, uri: []const u8) !void {
+        const doc = self.getDocument(uri) orelse return error.DocumentNotFound;
+        const tree = doc.tree orelse return error.TreeNotParsed;
+        const root = tree.rootNode() orelse return;
 
-        // Send diagnostics
-        const diagnostics = try self.server.diagnostics(text);
-        defer self.server.allocator.free(diagnostics);
+        var tokens = try grove.LSP.extractSemanticTokens(
+            self.allocator,
+            root,
+            doc.source,
+            null,
+        );
+        defer tokens.deinit(self.allocator);
 
-        // In real LSP server, you would send these diagnostics as JSON-RPC notification
-        std.debug.print("[LSP] textDocument/didOpen: {s}\n", .{uri});
-        std.debug.print("[LSP] Found {d} diagnostics\n", .{diagnostics.len});
-    }
+        std.log.info("  Generated {} semantic tokens", .{tokens.items.len});
 
-    /// Handle textDocument/hover request
-    pub fn handleHover(self: *JsonRpcHandler, uri: []const u8, position: grove.lsp.Position) !?[]const u8 {
-        const text = self.documents.get(uri) orelse return null;
-        return try self.server.hover(text, position);
-    }
+        // Show first 10 tokens as example
+        const count = @min(tokens.items.len, 10);
+        for (tokens.items[0..count]) |token| {
+            std.log.info("    [{}:{}] {s} (len={})", .{
+                token.line,
+                token.start_char,
+                @tagName(token.token_type),
+                token.length,
+            });
+        }
 
-    /// Handle textDocument/definition request
-    pub fn handleDefinition(self: *JsonRpcHandler, uri: []const u8, position: grove.lsp.Position) !?grove.lsp.Location {
-        const text = self.documents.get(uri) orelse return null;
-        var location = (try self.server.gotoDefinition(text, position)) orelse return null;
-
-        // Set the URI
-        location.uri = uri;
-        return location;
+        if (tokens.items.len > 10) {
+            std.log.info("    ... and {} more", .{tokens.items.len - 10});
+        }
     }
 };
-
-test "lsp server example" {
-    const allocator = std.testing.allocator;
-
-    const factory = grove.lsp.LanguageServerFactory.init(allocator);
-    var server = try factory.createZigServer();
-    defer server.deinit();
-
-    const source = "const x: i32 = 42;";
-
-    const diagnostics = try server.diagnostics(source);
-    defer allocator.free(diagnostics);
-
-    try std.testing.expect(diagnostics.len == 0);
-}

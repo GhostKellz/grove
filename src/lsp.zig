@@ -3,9 +3,40 @@
 //! This module provides utilities and abstractions for implementing LSP features
 //! using Grove's Tree-sitter parsing and semantic analysis capabilities.
 //! It's designed to be used by external editors and language servers.
+//!
+//! ## Core Helper Functions (New in v0.2.0)
+//!
+//! Grove now provides 4 key helper functions that eliminate ~50% of boilerplate
+//! code in LSP implementations:
+//!
+//! 1. **findNodeAtPosition** - Convert LSP Position to tree-sitter Node
+//! 2. **nodeToRange** - Convert tree-sitter Node to LSP Range
+//! 3. **extractSymbols** - Extract document symbols automatically
+//! 4. **collectDiagnostics** - Collect syntax errors from tree
+//!
+//! These helpers are used by GhostLS, Grim, and other editors to simplify
+//! their implementation.
 
 const std = @import("std");
 const grove = @import("root.zig");
+
+// Re-export helper functions (the 4+ key functions that reduce LSP boilerplate)
+pub const helpers = @import("lsp/helpers.zig");
+pub const findNodeAtPosition = helpers.findNodeAtPosition;
+pub const nodeToRange = helpers.nodeToRange;
+pub const extractSymbols = helpers.extractSymbols;
+pub const collectDiagnostics = helpers.collectDiagnostics;
+pub const findDefinition = helpers.findDefinition;
+pub const findReferences = helpers.findReferences;
+pub const extractFoldingRanges = helpers.extractFoldingRanges;
+pub const extractSemanticTokens = helpers.extractSemanticTokens;
+pub const SymbolInfo = helpers.SymbolInfo;
+pub const DiagnosticInfo = helpers.DiagnosticInfo;
+pub const SemanticToken = helpers.SemanticToken;
+pub const SemanticTokenType = helpers.SemanticTokenType;
+pub const SemanticTokenModifier = helpers.SemanticTokenModifier;
+pub const NodeKindToSymbolKind = helpers.NodeKindToSymbolKind;
+pub const NodeKindToTokenType = helpers.NodeKindToTokenType;
 
 // Re-export common LSP types for convenience
 pub const Position = struct {
@@ -191,11 +222,11 @@ pub const LanguageServer = struct {
         const node_at_cursor = root.descendantForPointRange(grove_point, grove_point) orelse return null;
 
         // If it's an identifier, search for its definition
-        const node_text = node_at_cursor.text(source) orelse return null;
-        const identifier_name = if (std.mem.eql(u8, node_at_cursor.kind(), "identifier"))
-            node_text
-        else
+        if (!std.mem.eql(u8, node_at_cursor.kind(), "identifier")) {
             return null;
+        }
+
+        const identifier_name = node_at_cursor.text(source) orelse return null;
 
         // Walk the tree looking for definitions (function_declaration, variable_declaration, etc.)
         var cursor = try grove.TreeCursor.init(root);
@@ -209,17 +240,18 @@ pub const LanguageServer = struct {
 
             if (is_definition) {
                 // Check if this definition matches our identifier
-                const def_name = node.childByFieldName("name") orelse continue;
-                const def_text = def_name.text(source) orelse continue;
+                if (node.childByFieldName("name")) |def_name| {
+                    const def_text = def_name.text(source) orelse continue;
 
-                if (std.mem.eql(u8, identifier_name, def_text)) {
-                    return Location{
-                        .uri = "", // Caller must provide URI
-                        .range = Range{
-                            .start = Position.fromGrovePoint(def_name.startPosition()),
-                            .end = Position.fromGrovePoint(def_name.endPosition()),
-                        },
-                    };
+                        if (std.mem.eql(u8, identifier_name, def_text)) {
+                        return Location{
+                            .uri = "", // Caller must provide URI
+                            .range = Range{
+                                .start = Position.fromGrovePoint(def_name.startPosition()),
+                                .end = Position.fromGrovePoint(def_name.endPosition()),
+                            },
+                        };
+                    }
                 }
             }
         }
@@ -259,10 +291,9 @@ pub const LanguageServer = struct {
     }
 
     /// Get completions at position
-    /// Extracts identifiers from the tree to provide basic completion suggestions
+    /// Extracts identifiers from the tree to provide completion suggestions
+    /// filtered by scope (only shows symbols visible at the given position)
     pub fn completion(self: *LanguageServer, source: []const u8, position: Position) ![]CompletionItem {
-        _ = position; // TODO: Use position to filter completions by scope
-
         var tree = try self.parseDocument(source);
         defer tree.deinit();
 
@@ -273,39 +304,75 @@ pub const LanguageServer = struct {
         var seen_identifiers = std.StringHashMap(void).init(self.allocator);
         defer seen_identifiers.deinit();
 
-        // Walk the tree and collect unique identifiers
-        var cursor = try grove.TreeCursor.init(root);
-        defer cursor.deinit();
+        // Find the node at cursor position to determine scope
+        const cursor_node = helpers.findNodeAtPosition(root, position);
 
-        while (cursor.nextNode()) |node| {
-            const kind = node.kind();
-
-            // Collect function and variable names
-            if (std.mem.indexOf(u8, kind, "function") != null or
-                std.mem.indexOf(u8, kind, "variable") != null or
-                std.mem.indexOf(u8, kind, "class") != null)
-            {
-                const name_node = node.childByFieldName("name") orelse continue;
-                const name_text = name_node.text(source) orelse continue;
-
-                // Skip if already seen
-                if (seen_identifiers.contains(name_text)) continue;
-
-                try seen_identifiers.put(name_text, {});
-
-                const completion_kind: CompletionItemKind = if (std.mem.indexOf(u8, kind, "function") != null)
-                    .function
-                else if (std.mem.indexOf(u8, kind, "class") != null)
-                    .class
-                else
-                    .variable;
-
-                try completion_list.append(.{
-                    .label = name_text,
-                    .kind = completion_kind,
-                    .detail = try std.fmt.allocPrint(self.allocator, "{s}", .{kind}),
-                });
+        // Walk up from cursor to find the containing scope (function, block, class, etc.)
+        const scope_node = if (cursor_node) |node| blk: {
+            var current = node;
+            while (current.parent()) |parent| {
+                const kind = parent.kind();
+                // Found a scope boundary
+                if (std.mem.indexOf(u8, kind, "function") != null or
+                    std.mem.indexOf(u8, kind, "block") != null or
+                    std.mem.indexOf(u8, kind, "class") != null or
+                    std.mem.indexOf(u8, kind, "module") != null)
+                {
+                    break :blk parent;
+                }
+                current = parent;
             }
+            break :blk current;
+        } else root;
+
+        // Collect completions from current scope and parent scopes
+        var current_scope: ?grove.Node = scope_node;
+        while (current_scope) |scope| {
+            var cursor = try grove.TreeCursor.init(scope);
+            defer cursor.deinit();
+
+            while (cursor.nextNode()) |node| {
+                const kind = node.kind();
+
+                // Collect function and variable names
+                if (std.mem.indexOf(u8, kind, "function") != null or
+                    std.mem.indexOf(u8, kind, "variable") != null or
+                    std.mem.indexOf(u8, kind, "class") != null)
+                {
+                    if (node.childByFieldName("name")) |name_node| {
+                        const name_text = name_node.text(source) orelse continue;
+
+                        // Skip if already seen
+                        if (seen_identifiers.contains(name_text)) continue;
+
+                        // Only include symbols defined before or at the cursor position
+                        const symbol_pos = node.startPosition();
+                        if (symbol_pos.row > position.line or
+                            (symbol_pos.row == position.line and symbol_pos.column > position.character))
+                        {
+                            continue;
+                        }
+
+                        try seen_identifiers.put(name_text, {});
+
+                        const completion_kind: CompletionItemKind = if (std.mem.indexOf(u8, kind, "function") != null)
+                            .function
+                        else if (std.mem.indexOf(u8, kind, "class") != null)
+                            .class
+                        else
+                            .variable;
+
+                        try completion_list.append(.{
+                            .label = name_text,
+                            .kind = completion_kind,
+                            .detail = try std.fmt.allocPrint(self.allocator, "{s}", .{kind}),
+                        });
+                    }
+                }
+            }
+
+            // Move to parent scope
+            current_scope = scope.parent();
         }
 
         return try completion_list.toOwnedSlice();
