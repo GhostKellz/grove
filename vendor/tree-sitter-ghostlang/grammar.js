@@ -44,22 +44,22 @@ module.exports = grammar({
       $.empty_statement
     ),
 
-    // Variable declarations: var x = 5;
+    // Variable declarations: var x = 5; (C-style) or var x = 5 (Lua-style)
     variable_declaration: $ => seq(
       'var',
       field('name', $.identifier),
       '=',
       field('value', $._expression_base),
-      ';'
+      optional(';')
     ),
 
-    // Local variable declarations: local x = 5;
+    // Local variable declarations: local x = 5; (C-style) or local x = 5 (Lua-style)
     local_variable_declaration: $ => seq(
       'local',
       field('name', $.identifier),
       '=',
       field('value', $._expression_base),
-      ';'
+      optional(';')
     ),
 
     // Variable declarations without semicolon (for use in for loops)
@@ -70,21 +70,44 @@ module.exports = grammar({
       field('value', $._expression_base)
     ),
 
-    // Function declarations: function name() { ... }
+    // Function declarations: function name() { ... } or function name() ... end
     function_declaration: $ => seq(
       'function',
       field('name', $.identifier),
       field('parameters', $.parameter_list),
-      field('body', $.block_statement)
+      field('body', choice($.block_statement, $.lua_function_body))
     ),
 
-    // Local function declarations: local function name() { ... }
+    // Local function declarations: local function name() { ... } or local function name() ... end
     local_function_declaration: $ => seq(
       'local',
       'function',
       field('name', $.identifier),
       field('parameters', $.parameter_list),
-      field('body', $.block_statement)
+      field('body', choice($.block_statement, $.lua_function_body))
+    ),
+
+    // Lua-style function body: statements followed by 'end'
+    lua_function_body: $ => seq(
+      repeat(choice(
+        $.variable_declaration,
+        $.local_variable_declaration,
+        $.function_declaration,
+        $.local_function_declaration,
+        $.if_statement,
+        $.while_statement,
+        $.for_statement,
+        $.generic_for_statement,
+        $.numeric_for_statement,
+        $.repeat_statement,
+        $.expression_statement,
+        $.return_statement,
+        $.break_statement,
+        $.continue_statement,
+        $.empty_statement,
+        $.comment
+      )),
+      'end'
     ),
 
     parameter_list: $ => seq(
@@ -296,16 +319,16 @@ module.exports = grammar({
     return_statement: $ => seq(
       'return',
       optional($._expression_base),
-      ';'
+      optional(';')
     ),
 
-    break_statement: $ => seq('break', ';'),
+    break_statement: $ => seq('break', optional(';')),
 
-    continue_statement: $ => seq('continue', ';'),
+    continue_statement: $ => seq('continue', optional(';')),
 
     expression_statement: $ => seq(
       $._expression_base,
-      ';'
+      optional(';')
     ),
 
     block_statement: $ => seq(
@@ -469,7 +492,7 @@ module.exports = grammar({
         $.identifier,
         $.string_literal
       ),
-      ':',
+      choice(':', '='),  // Support both C-style (:) and Lua-style (=)
       $._expression_base
     ),
 
@@ -534,7 +557,13 @@ module.exports = grammar({
     [$.member_expression, $.method_call_expression],
     [$.block_statement, $.object_literal],
     [$.object_member, $._expression_base],
-    [$.expression]
+    [$.expression],
+    [$.return_statement],
+    [$.break_statement],
+    [$.continue_statement],
+    [$.expression_statement],
+    [$.variable_declaration],
+    [$.local_variable_declaration]
   ],
 
   word: $ => $.identifier

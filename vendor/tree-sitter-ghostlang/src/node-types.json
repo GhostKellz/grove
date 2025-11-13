@@ -1468,6 +1468,10 @@
           {
             "type": "block_statement",
             "named": true
+          },
+          {
+            "type": "lua_function_body",
+            "named": true
           }
         ]
       },
@@ -1970,6 +1974,10 @@
           {
             "type": "block_statement",
             "named": true
+          },
+          {
+            "type": "lua_function_body",
+            "named": true
           }
         ]
       },
@@ -2306,6 +2314,81 @@
         },
         {
           "type": "varargs",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "lua_function_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "break_statement",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "continue_statement",
+          "named": true
+        },
+        {
+          "type": "empty_statement",
+          "named": true
+        },
+        {
+          "type": "expression_statement",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "function_declaration",
+          "named": true
+        },
+        {
+          "type": "generic_for_statement",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "local_function_declaration",
+          "named": true
+        },
+        {
+          "type": "local_variable_declaration",
+          "named": true
+        },
+        {
+          "type": "numeric_for_statement",
+          "named": true
+        },
+        {
+          "type": "repeat_statement",
+          "named": true
+        },
+        {
+          "type": "return_statement",
+          "named": true
+        },
+        {
+          "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
