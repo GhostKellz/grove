@@ -17,6 +17,7 @@ extern fn tree_sitter_toml() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_yaml() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_c() callconv(.c) *const c.TSLanguage;
 extern fn tree_sitter_gshell() callconv(.c) *const c.TSLanguage;
+extern fn tree_sitter_kalix() callconv(.c) *const c.TSLanguage;
 
 pub const Bundled = enum {
     json,
@@ -34,6 +35,7 @@ pub const Bundled = enum {
     yaml,
     c,
     gshell,
+    kalix,
 
     pub fn raw(self: Bundled) *const c.TSLanguage {
         return switch (self) {
@@ -52,6 +54,7 @@ pub const Bundled = enum {
             .yaml => tree_sitter_yaml(),
             .c => tree_sitter_c(),
             .gshell => tree_sitter_gshell(),
+            .kalix => tree_sitter_kalix(),
         };
     }
 
@@ -104,6 +107,7 @@ pub const Registry = struct {
         try self.register("yaml", try Bundled.yaml.get());
         try self.register("c", try Bundled.c.get());
         try self.register("gshell", try Bundled.gshell.get());
+        try self.register("kalix", try Bundled.kalix.get());
     }
 
     pub fn registerSharedLibrary(

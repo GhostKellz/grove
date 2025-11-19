@@ -16,6 +16,7 @@ const CMakeUtilities = @import("cmake_lang.zig").CMakeUtilities;
 const TOMLUtilities = @import("toml_lang.zig").TOMLUtilities;
 const YAMLUtilities = @import("yaml_lang.zig").YAMLUtilities;
 const CUtilities = @import("c_lang.zig").CUtilities;
+const KalixUtilities = @import("kalix.zig").KalixUtilities;
 
 const DocumentSymbol = Features.DocumentSymbol;
 const FoldingOptions = Features.FoldingOptions;
@@ -42,6 +43,7 @@ pub const LanguageUtilities = union(enum) {
     toml: TOMLUtilities,
     yaml: YAMLUtilities,
     c: CUtilities,
+    kalix: KalixUtilities,
 
     pub fn init(allocator: std.mem.Allocator, language: Languages) !LanguageUtilities {
         return switch (language) {
@@ -59,6 +61,8 @@ pub const LanguageUtilities = union(enum) {
             .toml => LanguageUtilities{ .toml = try TOMLUtilities.init(allocator) },
             .yaml => LanguageUtilities{ .yaml = try YAMLUtilities.init(allocator) },
             .c => LanguageUtilities{ .c = try CUtilities.init(allocator) },
+            .kalix => LanguageUtilities{ .kalix = try KalixUtilities.init(allocator) },
+            .gshell => return error.UnsupportedLanguage, // GShell doesn't have custom utilities yet
         };
     }
 
@@ -78,6 +82,7 @@ pub const LanguageUtilities = union(enum) {
             .toml => |*utils| utils.deinit(),
             .yaml => |*utils| utils.deinit(),
             .c => |*utils| utils.deinit(),
+            .kalix => |*utils| utils.deinit(),
         }
     }
 
@@ -101,6 +106,7 @@ pub const LanguageUtilities = union(enum) {
             .toml => |*utils| utils.documentSymbols(root, source),
             .yaml => |*utils| utils.documentSymbols(root, source),
             .c => |*utils| utils.documentSymbols(root, source),
+            .kalix => |*utils| utils.documentSymbols(root, source),
         };
     }
 
@@ -124,6 +130,7 @@ pub const LanguageUtilities = union(enum) {
             .toml => |*utils| utils.foldingRanges(root, options),
             .yaml => |*utils| utils.foldingRanges(root, options),
             .c => |*utils| utils.foldingRanges(root, options),
+            .kalix => |*utils| utils.foldingRanges(root, options),
         };
     }
 };

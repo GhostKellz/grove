@@ -1,0 +1,26 @@
+-- Test smart contract with blockchain features
+local balances = {}
+local owner = nil
+
+function init()
+    owner = web3.getCaller()
+    emit("ContractInitialized", { owner = owner })
+end
+
+function transfer(to, amount)
+    local from = web3.getCaller()
+    web3.require(balances[from] >= amount, "Insufficient balance")
+
+    balances[from] = balances[from] - amount
+    balances[to] = (balances[to] or 0) + amount
+
+    emit("Transfer", {
+        from = from,
+        to = to,
+        amount = amount
+    })
+end
+
+function balanceOf(account)
+    return balances[account] or 0
+end
