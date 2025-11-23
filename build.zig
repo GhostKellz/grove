@@ -57,6 +57,7 @@ pub fn build(b: *std.Build) void {
     const c_grammar_source = b.path("vendor/grammars/c/parser.c");
     const gshell_grammar_source = b.path("vendor/grammars/gshell/parser.c");
     const kalix_grammar_source = b.path("vendor/grammars/kalix/parser.c");
+    const zs_grammar_source = b.path("vendor/grammars/zs/parser.c");
     const tree_sitter_flags = &.{
         "-std=c99",
         "-DTREE_SITTER_STATIC=1",
@@ -105,6 +106,7 @@ pub fn build(b: *std.Build) void {
     mod.addCSourceFile(.{ .file = c_grammar_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = gshell_grammar_source, .flags = &.{"-std=c99"} });
     mod.addCSourceFile(.{ .file = kalix_grammar_source, .flags = &.{"-std=c99"} });
+    mod.addCSourceFile(.{ .file = zs_grammar_source, .flags = &.{"-std=c99"} });
 
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function
@@ -271,6 +273,48 @@ pub fn build(b: *std.Build) void {
 
     const lsp_example_step = b.step("run-example-lsp", "Run LSP server example");
     lsp_example_step.dependOn(&run_lsp_example.step);
+
+    // ZigScript test
+    const zs_test = b.addExecutable(.{
+        .name = "test-zs",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("test_zs.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "grove", .module = mod },
+            },
+        }),
+    });
+    zs_test.addIncludePath(tree_sitter_include);
+    zs_test.linkLibC();
+
+    const run_zs_test = b.addRunArtifact(zs_test);
+    run_zs_test.step.dependOn(b.getInstallStep());
+
+    const zs_test_step = b.step("test-zs", "Test ZigScript parser integration");
+    zs_test_step.dependOn(&run_zs_test.step);
+
+    // ZigScript file test
+    const zs_file_test = b.addExecutable(.{
+        .name = "test-zs-file",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("test_zs_file.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "grove", .module = mod },
+            },
+        }),
+    });
+    zs_file_test.addIncludePath(tree_sitter_include);
+    zs_file_test.linkLibC();
+
+    const run_zs_file_test = b.addRunArtifact(zs_file_test);
+    run_zs_file_test.step.dependOn(b.getInstallStep());
+
+    const zs_file_test_step = b.step("test-zs-file", "Test ZigScript parser on real file");
+    zs_file_test_step.dependOn(&run_zs_file_test.step);
 
     // Just like flags, top level steps are also listed in the `--help` menu.
     //
