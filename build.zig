@@ -76,6 +76,7 @@ pub fn build(b: *std.Build) void {
         // Later on we'll use this module as the root module of a test executable
         // which requires us to specify a target.
         .target = target,
+        .link_libc = true,
     });
     mod.addIncludePath(tree_sitter_include);
     mod.addCSourceFile(.{ .file = tree_sitter_source, .flags = tree_sitter_flags });
@@ -139,6 +140,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
             // List of modules available for import in source files part of the
             // root module.
+            .link_libc = true,
             .imports = &.{
                 // Here "grove" is the name you will use in your source code to
                 // import this module (e.g. `@import("grove")`). The name is
@@ -149,8 +151,7 @@ pub fn build(b: *std.Build) void {
             },
         }),
     });
-    exe.addIncludePath(tree_sitter_include);
-    exe.linkLibC();
+    exe.root_module.addIncludePath(tree_sitter_include);
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
@@ -190,8 +191,6 @@ pub fn build(b: *std.Build) void {
     const mod_tests = b.addTest(.{
         .root_module = mod,
     });
-    mod_tests.addIncludePath(tree_sitter_include);
-    mod_tests.linkLibC();
 
     // A run step that will run the test executable.
     const run_mod_tests = b.addRunArtifact(mod_tests);
@@ -202,8 +201,6 @@ pub fn build(b: *std.Build) void {
     const exe_tests = b.addTest(.{
         .root_module = exe.root_module,
     });
-    exe_tests.addIncludePath(tree_sitter_include);
-    exe_tests.linkLibC();
 
     // A run step that will run the second test executable.
     const run_exe_tests = b.addRunArtifact(exe_tests);
@@ -221,13 +218,13 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("src/benchmarks/throughput.zig"),
             .target = target,
             .optimize = .ReleaseFast,
+            .link_libc = true,
             .imports = &.{
                 .{ .name = "grove", .module = mod },
             },
         }),
     });
-    bench_exe.addIncludePath(tree_sitter_include);
-    bench_exe.linkLibC();
+    bench_exe.root_module.addIncludePath(tree_sitter_include);
     const run_bench = b.addRunArtifact(bench_exe);
     run_bench.step.dependOn(b.getInstallStep());
 
@@ -240,13 +237,13 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("src/benchmarks/latency.zig"),
             .target = target,
             .optimize = .ReleaseFast,
+            .link_libc = true,
             .imports = &.{
                 .{ .name = "grove", .module = mod },
             },
         }),
     });
-    latency_exe.addIncludePath(tree_sitter_include);
-    latency_exe.linkLibC();
+    latency_exe.root_module.addIncludePath(tree_sitter_include);
     const run_latency = b.addRunArtifact(latency_exe);
     run_latency.step.dependOn(b.getInstallStep());
 
@@ -260,13 +257,13 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("examples/lsp_server.zig"),
             .target = target,
             .optimize = optimize,
+            .link_libc = true,
             .imports = &.{
                 .{ .name = "grove", .module = mod },
             },
         }),
     });
-    lsp_example.addIncludePath(tree_sitter_include);
-    lsp_example.linkLibC();
+    lsp_example.root_module.addIncludePath(tree_sitter_include);
 
     const run_lsp_example = b.addRunArtifact(lsp_example);
     run_lsp_example.step.dependOn(b.getInstallStep());
@@ -281,13 +278,13 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("test_zs.zig"),
             .target = target,
             .optimize = optimize,
+            .link_libc = true,
             .imports = &.{
                 .{ .name = "grove", .module = mod },
             },
         }),
     });
-    zs_test.addIncludePath(tree_sitter_include);
-    zs_test.linkLibC();
+    zs_test.root_module.addIncludePath(tree_sitter_include);
 
     const run_zs_test = b.addRunArtifact(zs_test);
     run_zs_test.step.dependOn(b.getInstallStep());
@@ -302,13 +299,13 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("test_zs_file.zig"),
             .target = target,
             .optimize = optimize,
+            .link_libc = true,
             .imports = &.{
                 .{ .name = "grove", .module = mod },
             },
         }),
     });
-    zs_file_test.addIncludePath(tree_sitter_include);
-    zs_file_test.linkLibC();
+    zs_file_test.root_module.addIncludePath(tree_sitter_include);
 
     const run_zs_file_test = b.addRunArtifact(zs_file_test);
     run_zs_file_test.step.dependOn(b.getInstallStep());
