@@ -40,83 +40,58 @@ Grove ships with **15 production-ready grammars**, all compiled against tree-sit
 - **C** – `grove.Languages.c.get()` – C programming language
 - **GShell** – `grove.Languages.gshell.get()` – GShell command syntax
 
-### Ghostlang Support Snapshot
+### Ghostlang Support
 
-- **Parser source**: `vendor/tree-sitter-ghostlang/src/parser.c` (statically linked into Grove builds)
-- **Tree-sitter queries**: `vendor/tree-sitter-ghostlang/queries/` covering highlights, locals, textobjects, and injections
-- **Phase A features**: `local` variables/functions, generic `for k, v in` loops, anonymous functions, varargs `...`, method call syntax `obj:method()`, `break`/`continue` statements
-- **Control flow**: Numeric `for` loops (`for i = 1, 10[, step] do...end`), `repeat...until` blocks, and generic iterator loops
-- **File associations**: `.ghost`, `.gza` for Grim plugin and Ghostlang script workflows
-- **Grammar tests**: 29/29 tree-sitter corpus tests passing (100% coverage)
+- **Parser source**: `vendor/tree-sitter-ghostlang/src/parser.c` (statically linked)
+- **Queries**: highlights, locals, textobjects, folds, indents, and injections
+- **Syntax**: `local` variables/functions, generic `for k, v in` loops, anonymous functions, varargs, method calls, optional chaining (`?.`), nullish coalescing (`??`)
+- **File associations**: `.ghost`, `.gza`
+- **Grammar tests**: 31/31 corpus tests passing
 
 ## Project Status
 
-Phase 1 foundation work is complete. Grove is now in **Phase 2 – Production Editor Integration**, extending beyond the wrapper to deliver multi-grammar support, performance wins, and Grim-focused editor features over the Tree-sitter C runtime.
+Grove is **RC1 ready** - a production-quality Tree-sitter wrapper for Zig with comprehensive editor integration features.
 
-### Current Goals
+### Completed
 
-- ✅ Zig wrapper over Tree-sitter C runtime (MIT)
-- ✅ Chunked input adapter for incremental edits (`Parser.parseChunks`)
-- ✅ Safe parser lifecycle & pooling (`core/pool.zig`)
-- ✅ Query, highlight, and editor bridges (`grove.Query`, `grove.Editor`)
-- ✅ Benchmark harness with throughput metrics (`zig build bench`)
+- Zig wrapper over Tree-sitter C runtime (MIT)
+- Chunked input adapter for incremental edits (`Parser.parseChunks`)
+- Safe parser lifecycle & pooling (`core/pool.zig`)
+- Query, highlight, and editor bridges (`grove.Query`, `grove.Editor`)
+- Benchmark harness with throughput metrics (`zig build bench`)
 
 ## Architecture
 
-Grove follows a phased approach:
+Grove is structured in layers:
 
-1. **Phase 1**: Foundation wrapper over C Tree-sitter
-2. **Phase 2**: Integration with Grim editor
-3. **Phase 3**: Native Zig runtime optimization
+- **Core**: Safe Zig bindings over Tree-sitter C runtime
+- **Editor**: Query engine, highlighting, folding, symbols, and LSP helpers
+- **Performance**: Parser pooling, chunked input, incremental parsing
 
-## Phase 2 Roadmap (Next 6–8 Weeks)
+## Capabilities
 
-### Week 1–2 · Grammar Expansion
+### Grammar Coverage
+- 15 production grammars with highlight queries
+- Ghostlang support with `.ghost`/`.gza` file associations
+- Scanner support for complex grammars (Rust, TypeScript, JavaScript)
 
-- ✅ Vendored Zig grammar wired through `Bundled.zig`
-- 🔄 Maintain JSON grammar for configuration flows
-- ✅ Vendor Rust grammar (scanner support) for Grim plugins
-- ✅ Stage Ghostlang grammar and ship `.ghost`/`.gza` highlight queries
-- ✅ TypeScript grammar wired into Grove module with highlight regression tests
-- 🔄 Prepare Markdown grammar to round out editor coverage
+### Editor Integration
+- Query engine with capture metadata and validation
+- Highlight engine mapping captures to editor classes
+- Folding ranges, document symbols, hover metadata
+- Definition lookup and reference finding
+- Syntax error extraction with context
 
-### Week 3–4 · Performance Optimisation
+### Performance
+- Benchmark harness (`zig build bench`, `zig build bench-latency`)
+- Parser pooling for multi-threaded workloads
+- Chunked input for rope/streaming integration
+- Incremental parsing with <5ms edit latency target
 
-- Parsing throughput target: **≥10 MB/s** versus C Tree-sitter baseline
-- Memory ceiling: **<100 MB** while indexing 10 k-file projects
-- Incremental latency: **<5 ms** per edit with arena allocators & hot-path tuning
-- Focus areas: allocator strategy, parser profiling, incremental diffing, multi-threaded pipelines, grammar cache reuse
-- ✅ Added baseline benchmark (`zig build bench`) and parse timing API (`Parser.parseUtf8Timed`)
-
-### Week 5–6 · Editor Integration Features
-
-- ✅ Ship Tree-sitter query helpers and highlight engine (`grove.Query`, `grove.Highlight`)
-- ✅ Emit folding ranges, document symbols, and hover metadata through `grove.Editor`
-- Enrich diagnostics (error recovery) and Unicode hardening
-- Harden Unicode & multi-byte handling for international content
-
-### Week 7–8 · Production Polish
-
-- Guarantee graceful failure modes, bounded memory, and thread-safe parsing
-- Add tree serialisation/caching plus a lightweight plugin story for custom grammars
-- Expand QA: >1000 regression tests, fuzz harness, memory tooling, and performance benchmarks against the C runtime
-- Run real-world import trials on large open-source Zig/Rust/TypeScript projects
-
-### Success Metrics
-
-- ⚡ **Performance**: meet or exceed C Tree-sitter throughput with <10 ms incremental latency and 50 % lower memory footprint
-- 🧠 **Grammar Coverage**: ✅ 14 highlighted languages (JSON, Zig, Rust, Ghostlang, TypeScript, TSX, Bash, JavaScript, Python, Markdown, CMake, TOML, YAML, C)
-- 🛠️ **Editor Experience**: Complete Grim integration with syntax, folding, symbols, and navigation APIs
-- 🌱 **Ecosystem Health**: Publish Grove as a reusable Zig package, attract external grammar contributions, and position Grove as the Zig reference implementation for Tree-sitter
-
-### Integration Timeline Snapshot
-
-- **Week 1–2**: Finish JSON/Rust vendoring → begin Grim smoke tests
-- **Week 3–4**: Performance tuning → benchmark head-to-head with C Tree-sitter
-- **Week 5–6**: Editor feature rollout → full Grim syntax highlighting and navigation
-- **Week 7–8**: Production hardening → public-ready release builds and docs
-
-**End State:** Grove becomes the premier Tree-sitter experience for Zig—faster than the C runtime, tightly integrated with Grim, and ready for community adoption.
+### Quality
+- RAII resource management with no UB on moved trees
+- Comprehensive test suite
+- Error propagation over panics in public API
 
 ## Building
 
@@ -138,7 +113,7 @@ Run the throughput benchmark harness:
 zig build bench
 ```
 
-Track incremental latency against the <5 ms target:
+Track incremental latency against the <5 ms target:
 
 ```bash
 zig build bench-latency

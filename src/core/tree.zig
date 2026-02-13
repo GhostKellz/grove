@@ -3,6 +3,8 @@ const c = @import("../c/tree_sitter.zig").c;
 const Node = @import("node.zig").Node;
 const Language = @import("../language.zig").Language;
 
+pub const TreeError = error{InvalidHandle};
+
 pub const Tree = struct {
     handle: ?*c.TSTree,
 
@@ -46,9 +48,10 @@ pub const Tree = struct {
         return null;
     }
 
-    /// Get the language this tree was parsed with
-    pub fn language(self: *const Tree) Language {
-        const ptr = self.handle orelse @panic("invalid tree handle");
+    /// Get the language this tree was parsed with.
+    /// Returns TreeError.InvalidHandle if the tree handle is null.
+    pub fn language(self: *const Tree) TreeError!Language {
+        const ptr = self.handle orelse return TreeError.InvalidHandle;
         const lang_ptr = c.ts_tree_language(ptr);
         return Language.fromRaw(lang_ptr);
     }

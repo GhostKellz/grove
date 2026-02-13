@@ -12,9 +12,9 @@ pub const InputEdit = c.TSInputEdit;
 
 /// Builder for common edit operations
 pub const EditBuilder = struct {
-    /// Insert text at a position
-    pub fn insertText(row: u32, col: u32, text: []const u8) InputEdit {
-        const start_byte = 0; // Caller should calculate actual byte offset
+    /// Insert text at a position.
+    /// The start_byte parameter specifies the byte offset in the document.
+    pub fn insertText(start_byte: u32, row: u32, col: u32, text: []const u8) InputEdit {
         const start_point = Point{ .row = row, .column = col };
 
         // Count newlines and calculate end position
@@ -118,13 +118,22 @@ pub const EditBuilder = struct {
 const testing = std.testing;
 
 test "EditBuilder.insertText creates correct edit" {
-    const edit = EditBuilder.insertText(0, 0, "hello\nworld");
+    const edit = EditBuilder.insertText(0, 0, 0, "hello\nworld");
     try testing.expectEqual(@as(u32, 0), edit.start_byte);
     try testing.expectEqual(@as(u32, 0), edit.old_end_byte);
     try testing.expectEqual(@as(u32, 11), edit.new_end_byte);
     try testing.expectEqual(@as(u32, 0), edit.start_point.row);
     try testing.expectEqual(@as(u32, 1), edit.new_end_point.row);
     try testing.expectEqual(@as(u32, 5), edit.new_end_point.column);
+}
+
+test "EditBuilder.insertText with non-zero start_byte" {
+    const edit = EditBuilder.insertText(100, 5, 10, "test");
+    try testing.expectEqual(@as(u32, 100), edit.start_byte);
+    try testing.expectEqual(@as(u32, 100), edit.old_end_byte);
+    try testing.expectEqual(@as(u32, 104), edit.new_end_byte);
+    try testing.expectEqual(@as(u32, 5), edit.start_point.row);
+    try testing.expectEqual(@as(u32, 10), edit.start_point.column);
 }
 
 test "EditBuilder.deleteRange creates correct edit" {

@@ -100,18 +100,19 @@ pub fn findInjections(
 
     const root = tree.rootNode() orelse return &[_]Injection{};
 
-    var query = try Query.init(allocator, tree.language(), injection_query);
+    const tree_lang = tree.language() catch return &[_]Injection{};
+    var query = try Query.init(allocator, tree_lang, injection_query);
     defer query.deinit();
 
     var cursor = try QueryCursor.init();
     defer cursor.deinit();
 
-    cursor.exec(&query, root);
+    try cursor.exec(&query, root);
 
     var injections = std.ArrayList(Injection).init(allocator);
     errdefer injections.deinit();
 
-    while (cursor.nextCapture(&query)) |capture_result| {
+    while (try cursor.nextCapture(&query)) |capture_result| {
         const capture = capture_result.capture;
 
         // Look for language and content captures

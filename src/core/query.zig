@@ -13,9 +13,10 @@ pub const QueryError = error{
     Structure,
     LanguageMismatch,
     AllocationFailed,
+    InvalidHandle,
 };
 
-pub const CursorError = error{CursorUnavailable};
+pub const CursorError = error{ CursorUnavailable, InvalidHandle };
 
 pub const Query = struct {
     handle: ?*c.TSQuery,
@@ -56,29 +57,36 @@ pub const Query = struct {
         }
     }
 
-    fn must(self: *const Query) *c.TSQuery {
-        return self.handle orelse @panic("invalid query handle");
+    /// Get the raw handle, returning error if handle is invalid.
+    /// Prefer using this over direct handle access for safety.
+    fn must(self: *const Query) QueryError!*c.TSQuery {
+        return self.handle orelse QueryError.InvalidHandle;
     }
 
-    pub fn captureCount(self: *const Query) u32 {
-        return c.ts_query_capture_count(self.must());
+    /// Get the raw handle without error checking (for internal use where validity is guaranteed).
+    fn mustUnchecked(self: *const Query) *c.TSQuery {
+        return self.handle.?;
     }
 
-    pub fn patternCount(self: *const Query) u32 {
-        return c.ts_query_pattern_count(self.must());
+    pub fn captureCount(self: *const Query) QueryError!u32 {
+        return c.ts_query_capture_count(try self.must());
     }
 
-    pub fn captureName(self: *const Query, id: u32) []const u8 {
+    pub fn patternCount(self: *const Query) QueryError!u32 {
+        return c.ts_query_pattern_count(try self.must());
+    }
+
+    pub fn captureName(self: *const Query, id: u32) QueryError![]const u8 {
         var length: u32 = undefined;
-        const raw_ptr = c.ts_query_capture_name_for_id(self.must(), id, &length);
+        const raw_ptr = c.ts_query_capture_name_for_id(try self.must(), id, &length);
         if (raw_ptr == null or length == 0) return &[_]u8{};
         const slice_ptr: [*]const u8 = @ptrCast(raw_ptr);
         return slice_ptr[0..length];
     }
 
-    pub fn textPredicate(self: *const Query, pattern_index: u32) []const u8 {
+    pub fn textPredicate(self: *const Query, pattern_index: u32) QueryError![]const u8 {
         var length: u32 = undefined;
-        const raw_ptr = c.ts_query_string_value_for_id(self.must(), pattern_index, &length);
+        const raw_ptr = c.ts_query_string_value_for_id(try self.must(), pattern_index, &length);
         if (raw_ptr == null or length == 0) return &[_]u8{};
         const slice_ptr: [*]const u8 = @ptrCast(raw_ptr);
         return slice_ptr[0..length];
@@ -115,35 +123,41 @@ pub const QueryCursor = struct {
         }
     }
 
-    fn must(self: *const QueryCursor) *c.TSQueryCursor {
-        return self.handle orelse @panic("invalid query cursor handle");
+    /// Get the raw handle, returning error if handle is invalid.
+    fn must(self: *const QueryCursor) CursorError!*c.TSQueryCursor {
+        return self.handle orelse CursorError.InvalidHandle;
     }
 
-    pub fn reset(self: *QueryCursor) void {
-        c.ts_query_cursor_reset(self.must());
+    /// Get the raw handle without error checking (for internal use).
+    fn mustUnchecked(self: *const QueryCursor) *c.TSQueryCursor {
+        return self.handle.?;
     }
 
-    pub fn exec(self: *QueryCursor, query: *const Query, node: Node) void {
-        c.ts_query_cursor_exec(self.must(), query.must(), node.raw());
+    pub fn reset(self: *QueryCursor) CursorError!void {
+        c.ts_query_cursor_reset(try self.must());
     }
 
-    pub fn setByteRange(self: *QueryCursor, start_byte: u32, end_byte: u32) void {
-        c.ts_query_cursor_set_byte_range(self.must(), start_byte, end_byte);
+    pub fn exec(self: *QueryCursor, query: *const Query, node: Node) !void {
+        c.ts_query_cursor_exec(try self.must(), try query.must(), node.raw());
     }
 
-    pub fn setPointRange(self: *QueryCursor, start: Point, end: Point) void {
-        c.ts_query_cursor_set_point_range(self.must(), toTSPoint(start), toTSPoint(end));
+    pub fn setByteRange(self: *QueryCursor, start_byte: u32, end_byte: u32) CursorError!void {
+        c.ts_query_cursor_set_byte_range(try self.must(), start_byte, end_byte);
     }
 
-    pub fn nextCapture(self: *QueryCursor, query: *const Query) ?CaptureResult {
+    pub fn setPointRange(self: *QueryCursor, start: Point, end: Point) CursorError!void {
+        c.ts_query_cursor_set_point_range(try self.must(), toTSPoint(start), toTSPoint(end));
+    }
+
+    pub fn nextCapture(self: *QueryCursor, query: *const Query) !?CaptureResult {
         var match_obj: c.TSQueryMatch = undefined;
         var capture_index: u32 = undefined;
-        const has_next = c.ts_query_cursor_next_capture(self.must(), &match_obj, &capture_index);
+        const has_next = c.ts_query_cursor_next_capture(try self.must(), &match_obj, &capture_index);
         if (!has_next) return null;
 
         const captures_ptr: [*]const c.TSQueryCapture = @ptrCast(match_obj.captures);
         const capture = captures_ptr[capture_index];
-        const name = query.captureName(capture.index);
+        const name = try query.captureName(capture.index);
         return .{
             .match_id = match_obj.id,
             .pattern_index = match_obj.pattern_index,
@@ -264,10 +278,10 @@ fn createQuery(allocator: std.mem.Allocator, source: []const u8) !Query {
 fn consumeHighlights(query: *const Query, tree: Tree) !usize {
     var cursor = try QueryCursor.init();
     defer cursor.deinit();
-    cursor.exec(query, tree.rootNode() orelse return error.MissingRoot);
+    try cursor.exec(query, tree.rootNode() orelse return error.MissingRoot);
 
     var count: usize = 0;
-    while (cursor.nextCapture(query)) |_| {
+    while (try cursor.nextCapture(query)) |_| {
         count += 1;
     }
     return count;

@@ -232,13 +232,13 @@ pub const SemanticCursor = struct {
         var cursor = QueryCursor.init() catch return error.QueryCursorFailed;
         defer cursor.deinit();
 
-        cursor.exec(query, self.current);
+        try cursor.exec(query, self.current);
 
         var matches = std.ArrayList(QueryMatch){};
         defer matches.deinit(self.allocator);
 
         var count: usize = 0;
-        while (cursor.nextCapture(query)) |capture| {
+        while (try cursor.nextCapture(query)) |capture| {
             if (max_matches) |max| {
                 if (count >= max) break;
             }

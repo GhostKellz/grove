@@ -1,6 +1,5 @@
-; Syntax highlighting queries for Ghostlang v0.2.3
+; Syntax highlighting queries for Ghostlang v0.1.0
 ; These queries define how Grove should highlight different syntax elements
-; Including blockchain/Web3 support
 
 ; Keywords - C-style and Lua-style
 [
@@ -50,6 +49,9 @@
   "?"
   ":"
   ".."
+  "??"
+  "?."
+  "?["
 ] @operator
 
 ; Assignment operators (shown as string in AST due to aliasing)
@@ -99,6 +101,14 @@
 (member_expression
   property: (identifier) @property)
 
+; Optional chain properties
+(optional_chain_expression
+  property: (identifier) @property)
+
+; Optional call functions
+(optional_call_expression
+  function: (identifier) @function.call)
+
 ; Object keys
 (object_member
   (identifier) @property)
@@ -115,25 +125,6 @@
 ; Built-in functions - v0.1.0 additions
 ((identifier) @function.builtin
  (#match? @function.builtin "^(getCurrentLine|getLineText|setLineText|insertText|getAllText|replaceAllText|getCursorPosition|setCursorPosition|getSelection|setSelection|getSelectedText|replaceSelection|getFilename|getFileLanguage|isModified|notify|log|prompt|findAll|replaceAll|split|join|substring|indexOf|replace|createArray|arrayPush|arrayPop|arrayGet|arraySet|arrayLength|tableInsert|tableRemove|tableConcat|createObject|objectSet|objectGet|objectKeys|pairs|ipairs|stringMatch|stringFind|stringGsub|stringUpper|stringLower|stringFormat)$"))
-
-; Blockchain & Web3 API - v0.2.3 additions
-; emit() function for event emission
-((identifier) @function.builtin
- (#eq? @function.builtin "emit"))
-
-; web3 namespace identifier
-((identifier) @namespace
- (#eq? @namespace "web3"))
-
-; Web3 API methods
-(member_expression
-  object: (identifier) @namespace (#eq? @namespace "web3")
-  property: (identifier) @function.builtin
-  (#match? @function.builtin "^(getCaller|getThis|require|transfer|getBalance|getTimestamp|getBlockNumber|getGasLimit|getGasPrice|hash|verifySignature|encodeABI|decodeABI|emitEvent|revert|assert|getStorage|setStorage|deleteStorage|call|delegateCall|staticCall|create|create2)$"))
-
-; Blockchain type annotations (if used in comments or identifiers)
-((identifier) @type.builtin
- (#match? @type.builtin "^(Address|Hash|Signature|Receipt|Transaction|Block|Event|Gas)$"))
 
 ; String interpolation and escapes
 (escape_sequence) @string.escape

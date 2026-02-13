@@ -84,14 +84,14 @@ pub fn collectFoldingRangesFromQuery(
 ) FoldingQueryError![]FoldingRange {
     var cursor = try QueryCursor.init();
     defer cursor.deinit();
-    cursor.exec(query, root);
+    try cursor.exec(query, root);
 
     var result = std.ArrayList(FoldingRange){};
     errdefer result.deinit();
 
     if (capture_filter.len == 0) return result.toOwnedSlice(allocator);
 
-    while (cursor.nextCapture(query)) |hit| {
+    while (try cursor.nextCapture(query)) |hit| {
         if (!captureMatches(hit.capture.name, capture_filter)) continue;
 
         const node = hit.capture.node;
@@ -166,7 +166,7 @@ pub fn collectDocumentSymbols(
 ) SymbolError![]DocumentSymbol {
     var cursor = try QueryCursor.init();
     defer cursor.deinit();
-    cursor.exec(query, root);
+    try cursor.exec(query, root);
 
     var symbols = std.ArrayList(DocumentSymbol){};
     errdefer {
@@ -186,7 +186,7 @@ pub fn collectDocumentSymbols(
     var accumulators = std.AutoHashMap(u32, Accumulator).init(allocator);
     defer accumulators.deinit();
 
-    while (cursor.nextCapture(query)) |result| {
+    while (try cursor.nextCapture(query)) |result| {
         const capture_name = result.capture.name;
         const maybe_rule = resolveRuleIndex(rules, capture_name);
         if (maybe_rule == null) {

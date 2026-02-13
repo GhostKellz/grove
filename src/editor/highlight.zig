@@ -61,8 +61,8 @@ pub const HighlightEngine = struct {
     }
 
     pub fn highlight(self: *HighlightEngine, root: Node) HighlightError![]HighlightSpan {
-        self.cursor.reset();
-        self.cursor.exec(&self.query, root);
+        try self.cursor.reset();
+        try self.cursor.exec(&self.query, root);
         return collectWithCursor(self.allocator, &self.query, &self.cursor, self.rules);
     }
 };
@@ -75,7 +75,7 @@ pub fn collectHighlights(
 ) HighlightError![]HighlightSpan {
     var cursor = try QueryCursor.init();
     defer cursor.deinit();
-    cursor.exec(query, root);
+    try cursor.exec(query, root);
     return collectWithCursor(allocator, query, &cursor, rules);
 }
 
@@ -87,7 +87,7 @@ fn collectWithCursor(
 ) HighlightError![]HighlightSpan {
     var list = std.ArrayList(HighlightSpan){};
 
-    while (cursor.nextCapture(query)) |result| {
+    while (try cursor.nextCapture(query)) |result| {
         const highlight_class = resolveClass(result.capture.name, rules);
         const node = result.capture.node;
         try list.append(allocator, .{
