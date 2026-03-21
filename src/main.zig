@@ -2,9 +2,9 @@ const std = @import("std");
 const grove = @import("grove");
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    var parser = try grove.Parser.init(gpa.allocator());
+    var debug_allocator: std.heap.DebugAllocator(.{}) = .init;
+    defer _ = debug_allocator.deinit();
+    var parser = try grove.Parser.init(debug_allocator.allocator());
     defer parser.deinit();
 
     std.debug.print(
