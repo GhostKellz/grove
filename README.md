@@ -4,10 +4,11 @@
   <img src="assets/icons/grove.png" alt="Grove" width="175"/>
 </div>
 
-![Zig](https://img.shields.io/badge/Built%20with-Zig-yellow?logo=zig)
-![Version](https://img.shields.io/badge/Zig-0.17.0--dev-orange?logo=zig)
-![Async Runtime](https://img.shields.io/badge/Async-zsync-success?logo=zig)
-![LSP Ready](https://img.shields.io/badge/LSP-Ready-brightgreen?logo=visualstudiocode&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/Zig-F7A41D?style=for-the-badge&logo=zig&logoColor=white" alt="Zig">
+  <img src="https://img.shields.io/badge/Tree--sitter-6EBF8B?style=for-the-badge&logo=treesitter&logoColor=white" alt="Tree-sitter">
+  <img src="https://img.shields.io/badge/LSP-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="LSP">
+</p>
 
 A high-performance Tree-sitter wrapper for Zig, designed to provide safe, ergonomic syntax highlighting and parsing for the Grim text editor.
 
