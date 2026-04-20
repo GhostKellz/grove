@@ -51,27 +51,27 @@ pub fn main() !void {
     ;
 
     std.log.info("Opening document...", .{});
-    try server.openDocument("file:///example.gza", source);
+    try server.openDocument("file:///example.gla", source);
 
     // Demonstrate LSP features
     std.log.info("\n=== Document Symbols ===", .{});
-    try server.showDocumentSymbols("file:///example.gza");
+    try server.showDocumentSymbols("file:///example.gla");
 
     std.log.info("\n=== Diagnostics ===", .{});
-    try server.showDiagnostics("file:///example.gza");
+    try server.showDiagnostics("file:///example.gla");
 
     std.log.info("\n=== Go-to-Definition ===", .{});
     const position = grove.LSP.Position{ .line = 11, .character = 19 }; // "calculateSum" in main
-    try server.showDefinition("file:///example.gza", position);
+    try server.showDefinition("file:///example.gla", position);
 
     std.log.info("\n=== Find References ===", .{});
-    try server.showReferences("file:///example.gza", "calculateSum");
+    try server.showReferences("file:///example.gla", "calculateSum");
 
     std.log.info("\n=== Folding Ranges ===", .{});
-    try server.showFoldingRanges("file:///example.gza");
+    try server.showFoldingRanges("file:///example.gla");
 
     std.log.info("\n=== Semantic Tokens ===", .{});
-    try server.showSemanticTokens("file:///example.gza");
+    try server.showSemanticTokens("file:///example.gla");
 }
 
 /// Simple LSP Server using Grove helpers

@@ -557,7 +557,7 @@ fn extractJsonFloat(json: []const u8, key: []const u8) !f64 {
 
 // Sample source code for benchmarks
 fn getTypeScriptLargeSource() []const u8 {
-    return 
+    return
     \\interface Calculator {
     \\  value: number;
     \\  add(x: number): number;
@@ -616,7 +616,7 @@ fn getTypeScriptLargeSource() []const u8 {
 }
 
 fn getZigLargeSource() []const u8 {
-    return 
+    return
     \\const std = @import("std");
     \\
     \\const Point = struct {
@@ -675,7 +675,7 @@ fn getZigLargeSource() []const u8 {
 }
 
 fn getJsonMediumSource() []const u8 {
-    return 
+    return
     \\{
     \\  "name": "grove-performance-test",
     \\  "version": "1.0.0",
@@ -690,7 +690,7 @@ fn getJsonMediumSource() []const u8 {
     \\    "typescript": "^4.9.0"
     \\  },
     \\  "devDependencies": {
-    \\    "zig": "^0.16.0",
+    \\    "zig": "^0.17.0",
     \\    "eslint": "^8.0.0",
     \\    "prettier": "^2.8.0"
     \\  },
@@ -721,7 +721,7 @@ fn getJsonMediumSource() []const u8 {
 }
 
 fn getRustMediumSource() []const u8 {
-    return 
+    return
     \\use std::collections::HashMap;
     \\
     \\#[derive(Debug, Clone)]

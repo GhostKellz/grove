@@ -2,7 +2,7 @@
 
 ## Overview
 
-This tree-sitter grammar enables Grove to provide syntax highlighting, parsing, and navigation support for Ghostlang (`.ghost`) files.
+This tree-sitter grammar enables Grove to provide syntax highlighting, parsing, and navigation support for Ghostlang (`.gla`) files.
 
 **Tree-sitter Version:** 25.0+ (ABI 15)
 **Language Version:** Ghostlang 0.1.0
@@ -54,7 +54,7 @@ cp -r /path/to/ghostlang/tree-sitter-ghostlang vendor/grammars/ghostlang
 
 **Note:** The grammar includes a `tree-sitter.json` configuration file required by tree-sitter 25.0+ for ABI 15 support. This file defines:
 - Grammar metadata (version, license, authors)
-- File type associations (`.ghost`, `.gza`)
+- File type associations (`.gla`)
 - Query file mappings (highlights, locals, injections, textobjects)
 
 ### 2. Add to Grove's Language Registry
@@ -65,7 +65,7 @@ pub const LanguageConfig = struct {
     // ... existing languages
     .ghostlang => .{
         .name = "Ghostlang",
-        .extensions = &.{".ghost", ".gza"},
+        .extensions = &.{".gla"},
         .tree_sitter = "ghostlang",
         .comment_prefix = "//",
         .parser_path = "vendor/grammars/ghostlang/src/parser.c",

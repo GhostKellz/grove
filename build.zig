@@ -64,6 +64,15 @@ pub fn build(b: *std.Build) void {
         "-D_DEFAULT_SOURCE",
         "-D_GNU_SOURCE",
     };
+    const tree_sitter_translate = b.addTranslateC(.{
+        .root_source_file = b.path("vendor/tree-sitter/lib/include/tree_sitter/api.h"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    tree_sitter_translate.addIncludePath(tree_sitter_include);
+    tree_sitter_translate.defineCMacro("TREE_SITTER_STATIC", "1");
+    const tree_sitter_c_module = tree_sitter_translate.createModule();
 
     const mod = b.addModule("grove", .{
         // The root source file is the "entry point" of this module. Users of
@@ -77,6 +86,9 @@ pub fn build(b: *std.Build) void {
         // which requires us to specify a target.
         .target = target,
         .link_libc = true,
+        .imports = &.{
+            .{ .name = "tree_sitter_c", .module = tree_sitter_c_module },
+        },
     });
     mod.addIncludePath(tree_sitter_include);
     mod.addCSourceFile(.{ .file = tree_sitter_source, .flags = tree_sitter_flags });

@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-04-20
+
+### Fixed
+- Restored Zig 0.17 development compatibility by replacing the old source-level `@cImport` tree-sitter binding path with a build-time translated C module
+- Unblocked downstream consumers such as ghostls that build Grove with `/opt/zig-dev`
+
+### Changed
+- Updated active Ghostlang integration docs and examples to use the `.gla` extension as the canonical source format
+- Aligned README compatibility text with the current Zig 0.17 development baseline
+
 ## [0.1.1] - 2025-10-03
 
 ### Fixed

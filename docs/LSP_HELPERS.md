@@ -98,7 +98,7 @@ pub fn nodeToRange(node: grove.Node) grove.LSP.Range
 const range = grove.LSP.nodeToRange(identifier_node);
 
 const location = grove.LSP.Location{
-    .uri = "file:///path/to/file.gza",
+    .uri = "file:///path/to/file.gla",
     .range = range,
 };
 

@@ -5,7 +5,7 @@
 </div>
 
 ![Zig](https://img.shields.io/badge/Built%20with-Zig-yellow?logo=zig)
-![Version](https://img.shields.io/badge/Zig-0.16.0--dev-orange?logo=zig)
+![Version](https://img.shields.io/badge/Zig-0.17.0--dev-orange?logo=zig)
 ![Async Runtime](https://img.shields.io/badge/Async-zsync-success?logo=zig)
 ![LSP Ready](https://img.shields.io/badge/LSP-Ready-brightgreen?logo=visualstudiocode&logoColor=white)
 
@@ -27,7 +27,7 @@ Grove ships with **15 production-ready grammars**, all compiled against tree-sit
 - **JSON** – `grove.Languages.json.get()` – Configuration and data files
 - **Zig** – `grove.Languages.zig.get()` – Zig programming language
 - **Rust** – `grove.Languages.rust.get()` – Rust with scanner support
-- **Ghostlang** – `grove.Languages.ghostlang.get()` – Ghostlang scripting (`.ghost`, `.gza`)
+- **Ghostlang** – `grove.Languages.ghostlang.get()` – Ghostlang scripting (`.gla`)
 - **TypeScript** – `grove.Languages.typescript.get()` – TypeScript with scanner
 - **TSX** – `grove.Languages.tsx.get()` – TypeScript + JSX
 - **Bash** – `grove.Languages.bash.get()` – Shell scripting
@@ -45,7 +45,7 @@ Grove ships with **15 production-ready grammars**, all compiled against tree-sit
 - **Parser source**: `vendor/tree-sitter-ghostlang/src/parser.c` (statically linked)
 - **Queries**: highlights, locals, textobjects, folds, indents, and injections
 - **Syntax**: `local` variables/functions, generic `for k, v in` loops, anonymous functions, varargs, method calls, optional chaining (`?.`), nullish coalescing (`??`)
-- **File associations**: `.ghost`, `.gza`
+- **File associations**: `.gla`
 - **Grammar tests**: 31/31 corpus tests passing
 
 ## Project Status
@@ -72,7 +72,7 @@ Grove is structured in layers:
 
 ### Grammar Coverage
 - 15 production grammars with highlight queries
-- Ghostlang support with `.ghost`/`.gza` file associations
+- Ghostlang support with `.gla` file associations
 - Scanner support for complex grammars (Rust, TypeScript, JavaScript)
 
 ### Editor Integration
@@ -95,7 +95,7 @@ Grove is structured in layers:
 
 ## Building
 
-Grove requires Zig 0.16.0-dev or later.
+Grove requires Zig 0.17.0-dev or later.
 
 ```bash
 zig build
