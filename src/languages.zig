@@ -73,21 +73,21 @@ const std = @import("std");
 pub const DynamicLoadError = LanguageError || std.DynLib.OpenError || error{SymbolNotFound};
 pub const Registry = struct {
     allocator: std.mem.Allocator,
-    map: std.StringArrayHashMap(Language),
+    map: std.StringArrayHashMapUnmanaged(Language),
 
     pub fn init(allocator: std.mem.Allocator) Registry {
         return .{
             .allocator = allocator,
-            .map = std.StringArrayHashMap(Language).init(allocator),
+            .map = .empty,
         };
     }
 
     pub fn deinit(self: *Registry) void {
-        self.map.deinit();
+        self.map.deinit(self.allocator);
     }
 
     pub fn register(self: *Registry, name: []const u8, language: Language) !void {
-        try self.map.put(name, language);
+        try self.map.put(self.allocator, name, language);
     }
 
     pub fn get(self: *const Registry, name: []const u8) ?Language {

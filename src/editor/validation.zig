@@ -37,18 +37,19 @@ pub fn validateCommands(
     source: []const u8,
     validator: CommandValidator,
 ) ![]ValidationResult {
-    var results = std.ArrayList(ValidationResult).init(allocator);
-    errdefer results.deinit();
+    var results: std.ArrayList(ValidationResult) = .empty;
+    errdefer results.deinit(allocator);
 
-    try walkAndValidate(root, source, validator, &results);
+    try walkAndValidate(root, source, validator, allocator, &results);
 
-    return try results.toOwnedSlice();
+    return try results.toOwnedSlice(allocator);
 }
 
 fn walkAndValidate(
     node: Node,
     source: []const u8,
     validator: CommandValidator,
+    allocator: std.mem.Allocator,
     results: *std.ArrayList(ValidationResult),
 ) !void {
     const node_kind = node.kind();
@@ -71,7 +72,7 @@ fn walkAndValidate(
             else
                 .unknown;
 
-            try results.append(.{
+            try results.append(allocator, .{
                 .start_byte = start,
                 .end_byte = end,
                 .is_valid = is_valid or std.mem.eql(u8, node_kind, "builtin_command"),
@@ -84,7 +85,7 @@ fn walkAndValidate(
     var i: u32 = 0;
     while (i < node.childCount()) : (i += 1) {
         if (node.child(i)) |child| {
-            try walkAndValidate(child, source, validator, results);
+            try walkAndValidate(child, source, validator, allocator, results);
         }
     }
 }

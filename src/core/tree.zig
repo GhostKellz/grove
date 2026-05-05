@@ -82,7 +82,7 @@ pub const Tree = struct {
     /// defer ranges.deinit();
     /// ```
     pub fn diff(self: *const Tree, allocator: std.mem.Allocator, old_tree: *const Tree) !std.ArrayList(ChangedRange) {
-        var ranges: std.ArrayList(ChangedRange) = .{};
+        var ranges: std.ArrayList(ChangedRange) = .empty;
         errdefer ranges.deinit(allocator);
 
         const new_ptr = self.handle orelse return ranges;

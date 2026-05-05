@@ -212,7 +212,7 @@ pub const Node = struct {
     /// Get all children with the given field name
     /// Caller owns the returned ArrayList and must call deinit()
     pub fn childrenByFieldName(self: Node, allocator: std.mem.Allocator, field_name: []const u8) !std.ArrayList(Node) {
-        var results: std.ArrayList(Node) = .{};
+        var results: std.ArrayList(Node) = .empty;
         errdefer results.deinit(allocator);
 
         const count = self.childCount();
@@ -255,7 +255,7 @@ pub const Node = struct {
         allocator: std.mem.Allocator,
 
         pub fn init(allocator: std.mem.Allocator, root: Node) !NamedDescendantsIterator {
-            var stack: std.ArrayList(Node) = .{};
+            var stack: std.ArrayList(Node) = .empty;
             try stack.append(allocator, root);
             return .{
                 .stack = stack,
@@ -304,7 +304,7 @@ pub const Node = struct {
         allocator: std.mem.Allocator,
         predicate: *const fn (Node) bool,
     ) !std.ArrayList(Node) {
-        var results: std.ArrayList(Node) = .{};
+        var results: std.ArrayList(Node) = .empty;
         errdefer results.deinit(allocator);
 
         const count = self.childCount();

@@ -60,7 +60,7 @@ pub const SyntaxError = struct {
 pub fn getSyntaxErrors(tree: Tree, allocator: std.mem.Allocator) ![]SyntaxError {
     const root = tree.rootNode() orelse return &[_]SyntaxError{};
 
-    var errors: std.ArrayList(SyntaxError) = .{};
+    var errors: std.ArrayList(SyntaxError) = .empty;
     errdefer {
         for (errors.items) |*err| err.deinit(allocator);
         errors.deinit(allocator);
@@ -215,7 +215,7 @@ fn inferExpectedTokens(
 
         // Common patterns for expected tokens
         if (std.mem.indexOf(u8, parent_kind, "function") != null) {
-            var expected: std.ArrayList([]const u8) = .{};
+            var expected: std.ArrayList([]const u8) = .empty;
             try expected.append(allocator, try allocator.dupe(u8, "identifier"));
             try expected.append(allocator, try allocator.dupe(u8, "parameter"));
             try expected.append(allocator, try allocator.dupe(u8, "body"));
@@ -223,7 +223,7 @@ fn inferExpectedTokens(
         }
 
         if (std.mem.indexOf(u8, parent_kind, "call") != null) {
-            var expected: std.ArrayList([]const u8) = .{};
+            var expected: std.ArrayList([]const u8) = .empty;
             try expected.append(allocator, try allocator.dupe(u8, "argument"));
             try expected.append(allocator, try allocator.dupe(u8, ")"));
             return try expected.toOwnedSlice(allocator);
@@ -232,7 +232,7 @@ fn inferExpectedTokens(
         if (std.mem.indexOf(u8, parent_kind, "array") != null or
             std.mem.indexOf(u8, parent_kind, "list") != null)
         {
-            var expected: std.ArrayList([]const u8) = .{};
+            var expected: std.ArrayList([]const u8) = .empty;
             try expected.append(allocator, try allocator.dupe(u8, "element"));
             try expected.append(allocator, try allocator.dupe(u8, ","));
             try expected.append(allocator, try allocator.dupe(u8, "]"));

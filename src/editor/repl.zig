@@ -165,11 +165,11 @@ pub const RealtimeHighlighter = struct {
         const root = tree.rootNode() orelse return RealtimeHighlighterError.InvalidTree;
         cursor.exec(query, root);
 
-        var spans = std.ArrayList(HighlightSpan).init(arena_allocator);
+        var spans: std.ArrayList(HighlightSpan) = .empty;
 
         while (try cursor.nextCapture(query)) |result| {
             const node = result.capture.node;
-            try spans.append(.{
+            try spans.append(arena_allocator, .{
                 .start_byte = node.startByte(),
                 .end_byte = node.endByte(),
                 .capture = result.capture.name,
@@ -177,7 +177,7 @@ pub const RealtimeHighlighter = struct {
             });
         }
 
-        return try spans.toOwnedSlice();
+        return try spans.toOwnedSlice(arena_allocator);
     }
 
     /// Check if line has syntax errors
@@ -211,17 +211,17 @@ pub const SyntaxError = struct {
 };
 
 fn collectErrors(allocator: std.mem.Allocator, root: Node) ![]SyntaxError {
-    var errors = std.ArrayList(SyntaxError).init(allocator);
+    var errors: std.ArrayList(SyntaxError) = .empty;
 
     // Walk tree looking for ERROR nodes
-    try walkForErrors(root, &errors);
+    try walkForErrors(root, allocator, &errors);
 
-    return try errors.toOwnedSlice();
+    return try errors.toOwnedSlice(allocator);
 }
 
-fn walkForErrors(node: Node, errors: *std.ArrayList(SyntaxError)) !void {
+fn walkForErrors(node: Node, allocator: std.mem.Allocator, errors: *std.ArrayList(SyntaxError)) !void {
     if (std.mem.eql(u8, node.kind(), "ERROR") or std.mem.eql(u8, node.kind(), "MISSING")) {
-        try errors.append(.{
+        try errors.append(allocator, .{
             .start_byte = node.startByte(),
             .end_byte = node.endByte(),
             .kind = node.kind(),
@@ -231,7 +231,7 @@ fn walkForErrors(node: Node, errors: *std.ArrayList(SyntaxError)) !void {
     var i: u32 = 0;
     while (i < node.childCount()) : (i += 1) {
         if (node.child(i)) |child| {
-            try walkForErrors(child, errors);
+            try walkForErrors(child, allocator, errors);
         }
     }
 }

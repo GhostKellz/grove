@@ -114,7 +114,7 @@ pub fn extractSymbols(
     source: []const u8,
     node_kind_map: ?*const NodeKindToSymbolKind,
 ) !std.ArrayList(SymbolInfo) {
-    var symbols: std.ArrayList(SymbolInfo) = .{};
+    var symbols: std.ArrayList(SymbolInfo) = .empty;
     errdefer {
         for (symbols.items) |*sym| sym.deinit(allocator);
         symbols.deinit(allocator);
@@ -146,7 +146,7 @@ fn collectSymbolsRecursive(
         // Extract symbol name
         const name = try extractSymbolName(allocator, node, source);
 
-        var children: std.ArrayList(SymbolInfo) = .{};
+        var children: std.ArrayList(SymbolInfo) = .empty;
         errdefer {
             for (children.items) |*child| child.deinit(allocator);
             children.deinit(allocator);
@@ -311,7 +311,7 @@ pub fn collectDiagnostics(
     root: grove.Node,
     source: []const u8,
 ) !std.ArrayList(DiagnosticInfo) {
-    var diagnostics: std.ArrayList(DiagnosticInfo) = .{};
+    var diagnostics: std.ArrayList(DiagnosticInfo) = .empty;
     errdefer {
         for (diagnostics.items) |*diag| diag.deinit(allocator);
         diagnostics.deinit(allocator);
@@ -484,7 +484,7 @@ pub fn findReferences(
     identifier: []const u8,
     source: []const u8,
 ) !std.ArrayList(grove.Node) {
-    var references: std.ArrayList(grove.Node) = .{};
+    var references: std.ArrayList(grove.Node) = .empty;
     errdefer references.deinit(allocator);
 
     try findReferencesRecursive(allocator, root, identifier, source, &references);
@@ -538,7 +538,7 @@ pub fn extractFoldingRanges(
     source: []const u8,
 ) !std.ArrayList(lsp.FoldingRange) {
     _ = source;
-    var ranges: std.ArrayList(lsp.FoldingRange) = .{};
+    var ranges: std.ArrayList(lsp.FoldingRange) = .empty;
     errdefer ranges.deinit(allocator);
 
     try collectFoldingRangesRecursive(allocator, root, &ranges);
@@ -668,7 +668,7 @@ pub fn extractSemanticTokens(
     source: []const u8,
     type_mapper: ?*const NodeKindToTokenType,
 ) !std.ArrayList(SemanticToken) {
-    var tokens: std.ArrayList(SemanticToken) = .{};
+    var tokens: std.ArrayList(SemanticToken) = .empty;
     errdefer tokens.deinit(allocator);
 
     try collectSemanticTokensRecursive(allocator, root, source, &tokens, type_mapper);

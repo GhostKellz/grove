@@ -298,8 +298,8 @@ pub const LanguageServer = struct {
         defer tree.deinit();
 
         const root = tree.rootNode() orelse return &.{};
-        var completion_list = std.ArrayList(CompletionItem).init(self.allocator);
-        errdefer completion_list.deinit();
+        var completion_list: std.ArrayList(CompletionItem) = .empty;
+        errdefer completion_list.deinit(self.allocator);
 
         var seen_identifiers = std.StringHashMap(void).init(self.allocator);
         defer seen_identifiers.deinit();
@@ -362,7 +362,7 @@ pub const LanguageServer = struct {
                         else
                             .variable;
 
-                        try completion_list.append(.{
+                        try completion_list.append(self.allocator, .{
                             .label = name_text,
                             .kind = completion_kind,
                             .detail = try std.fmt.allocPrint(self.allocator, "{s}", .{kind}),
@@ -375,7 +375,7 @@ pub const LanguageServer = struct {
             current_scope = scope.parent();
         }
 
-        return try completion_list.toOwnedSlice();
+        return try completion_list.toOwnedSlice(self.allocator);
     }
 
     /// Format document
@@ -387,8 +387,8 @@ pub const LanguageServer = struct {
         const root = tree.rootNode() orelse return source;
 
         // Simple formatting: rebuild source with consistent indentation
-        var formatted = std.ArrayList(u8).init(self.allocator);
-        errdefer formatted.deinit();
+        var formatted: std.ArrayList(u8) = .empty;
+        errdefer formatted.deinit(self.allocator);
 
         var current_line: u32 = 0;
         var indent_level: usize = 0;
@@ -402,27 +402,27 @@ pub const LanguageServer = struct {
 
             // Add newline and indentation for new lines
             if (start_pos.row > current_line) {
-                try formatted.append('\n');
+                try formatted.append(self.allocator, '\n');
                 current_line = start_pos.row;
 
                 // Add indentation based on depth
                 const depth = node.depth();
                 indent_level = @min(depth, 20); // Cap at 20 levels
                 for (0..indent_level) |_| {
-                    try formatted.appendSlice(indent_str);
+                    try formatted.appendSlice(self.allocator, indent_str);
                 }
             }
 
             // Append node text
             if (node.childCount() == 0) { // Only append leaf nodes
                 if (node.text(source)) |text| {
-                    try formatted.appendSlice(text);
-                    try formatted.append(' '); // Add space between tokens
+                    try formatted.appendSlice(self.allocator, text);
+                    try formatted.append(self.allocator, ' '); // Add space between tokens
                 }
             }
         }
 
-        return try formatted.toOwnedSlice();
+        return try formatted.toOwnedSlice(self.allocator);
     }
 
     /// Get diagnostics (syntax errors, warnings)

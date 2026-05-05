@@ -56,12 +56,12 @@ pub fn parseWithInjections(
     const host_tree = try host_parser.parseUtf8(null, source);
 
     // Parse each injection
-    var injected_trees = std.ArrayList(InjectionResult.InjectedTree).init(allocator);
+    var injected_trees: std.ArrayList(InjectionResult.InjectedTree) = .empty;
     errdefer {
         for (injected_trees.items) |*item| {
             item.tree.deinit();
         }
-        injected_trees.deinit();
+        injected_trees.deinit(allocator);
     }
 
     for (injections) |injection| {
@@ -71,7 +71,7 @@ pub fn parseWithInjections(
         try injection_parser.setLanguage(injection.language);
         const injected_tree = try injection_parser.parseUtf8(null, injection.content);
 
-        try injected_trees.append(.{
+        try injected_trees.append(allocator, .{
             .tree = injected_tree,
             .language = injection.language,
             .start_byte = injection.start_byte,
@@ -81,7 +81,7 @@ pub fn parseWithInjections(
 
     return .{
         .host_tree = host_tree,
-        .injected_trees = try injected_trees.toOwnedSlice(),
+        .injected_trees = try injected_trees.toOwnedSlice(allocator),
         .allocator = allocator,
     };
 }
@@ -109,8 +109,8 @@ pub fn findInjections(
 
     try cursor.exec(&query, root);
 
-    var injections = std.ArrayList(Injection).init(allocator);
-    errdefer injections.deinit();
+    var injections: std.ArrayList(Injection) = .empty;
+    errdefer injections.deinit(allocator);
 
     while (try cursor.nextCapture(&query)) |capture_result| {
         const capture = capture_result.capture;
@@ -124,7 +124,7 @@ pub fn findInjections(
                 const start = capture.node.startByte();
                 const end = capture.node.endByte();
 
-                try injections.append(.{
+                try injections.append(allocator, .{
                     .language = lang,
                     .start_byte = start,
                     .end_byte = end,
@@ -134,7 +134,7 @@ pub fn findInjections(
         }
     }
 
-    return injections.toOwnedSlice();
+    return injections.toOwnedSlice(allocator);
 }
 
 const testing = std.testing;
