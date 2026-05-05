@@ -5,6 +5,7 @@ zig-out/
 archive/
 TODO.md
 .zig-cache/
+tasks/
 ROADMAP.md
 ZIG_PROJECTS.md
 CODEX.md
