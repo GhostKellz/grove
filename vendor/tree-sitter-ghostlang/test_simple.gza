@@ -1,4 +1,0 @@
-function test()
-    local x = 5
-    emit("Test", {value = x})
-end

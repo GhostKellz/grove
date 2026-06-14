@@ -1,0 +1,58 @@
+{
+  "name": "ghostlang",
+  "displayName": "Ghostlang",
+  "description": "Ghostlang language support for VSCode - syntax highlighting, snippets, and more",
+  "version": "0.1.0",
+  "publisher": "ghostlang",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ghostkellz/tree-sitter-ghostlang"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "ghostlang",
+    "gla",
+    "lua",
+    "scripting",
+    "grim",
+    "editor"
+  ],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "ghostlang",
+        "aliases": [
+          "Ghostlang",
+          "ghostlang"
+        ],
+        "extensions": [
+          ".gla"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/ghostlang-light.png",
+          "dark": "./icons/ghostlang-dark.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ghostlang",
+        "scopeName": "source.ghostlang",
+        "path": "./syntaxes/ghostlang.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "ghostlang",
+        "path": "./snippets/ghostlang.json"
+      }
+    ]
+  }
+}

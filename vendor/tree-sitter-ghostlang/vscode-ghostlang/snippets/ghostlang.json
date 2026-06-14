@@ -1,0 +1,220 @@
+{
+  "Function Declaration (C-style)": {
+    "prefix": "func",
+    "body": [
+      "function ${1:name}(${2:params}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Define a function with C-style braces"
+  },
+  "Function Declaration (Lua-style)": {
+    "prefix": "funcl",
+    "body": [
+      "function ${1:name}(${2:params})",
+      "\t$0",
+      "end"
+    ],
+    "description": "Define a function with Lua-style end"
+  },
+  "Local Function": {
+    "prefix": "lfunc",
+    "body": [
+      "local function ${1:name}(${2:params})",
+      "\t$0",
+      "end"
+    ],
+    "description": "Define a local function"
+  },
+  "Variable Declaration": {
+    "prefix": "var",
+    "body": "var ${1:name} = ${2:value};",
+    "description": "Declare a variable"
+  },
+  "Local Variable": {
+    "prefix": "local",
+    "body": "local ${1:name} = ${2:value}",
+    "description": "Declare a local variable"
+  },
+  "If Statement (C-style)": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "If statement with C-style braces"
+  },
+  "If-Else Statement (C-style)": {
+    "prefix": "ife",
+    "body": [
+      "if (${1:condition}) {",
+      "\t$2",
+      "} else {",
+      "\t$0",
+      "}"
+    ],
+    "description": "If-else statement with C-style braces"
+  },
+  "If Statement (Lua-style)": {
+    "prefix": "ifl",
+    "body": [
+      "if ${1:condition} then",
+      "\t$0",
+      "end"
+    ],
+    "description": "If statement with Lua-style then/end"
+  },
+  "If-Else Statement (Lua-style)": {
+    "prefix": "ifel",
+    "body": [
+      "if ${1:condition} then",
+      "\t$2",
+      "else",
+      "\t$0",
+      "end"
+    ],
+    "description": "If-else statement with Lua-style then/end"
+  },
+  "While Loop (C-style)": {
+    "prefix": "while",
+    "body": [
+      "while (${1:condition}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "While loop with C-style braces"
+  },
+  "While Loop (Lua-style)": {
+    "prefix": "whilel",
+    "body": [
+      "while ${1:condition} do",
+      "\t$0",
+      "end"
+    ],
+    "description": "While loop with Lua-style do/end"
+  },
+  "For Loop (C-style)": {
+    "prefix": "for",
+    "body": [
+      "for (var ${1:i} = ${2:0}; ${1:i} < ${3:count}; ${1:i}++) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "For loop with C-style syntax"
+  },
+  "For Loop (Lua-style numeric)": {
+    "prefix": "forl",
+    "body": [
+      "for ${1:i} = ${2:1}, ${3:10} do",
+      "\t$0",
+      "end"
+    ],
+    "description": "Numeric for loop with Lua-style syntax"
+  },
+  "For-In Loop (C-style)": {
+    "prefix": "forin",
+    "body": [
+      "for (var ${1:item} in ${2:items}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "For-in loop for iterating"
+  },
+  "For Loop with pairs": {
+    "prefix": "forpairs",
+    "body": [
+      "for ${1:k}, ${2:v} in pairs(${3:table}) do",
+      "\t$0",
+      "end"
+    ],
+    "description": "For loop with pairs iterator"
+  },
+  "For Loop with ipairs": {
+    "prefix": "foripairs",
+    "body": [
+      "for ${1:i}, ${2:v} in ipairs(${3:array}) do",
+      "\t$0",
+      "end"
+    ],
+    "description": "For loop with ipairs iterator"
+  },
+  "Repeat-Until Loop": {
+    "prefix": "repeat",
+    "body": [
+      "repeat",
+      "\t$0",
+      "until ${1:condition}"
+    ],
+    "description": "Repeat-until loop"
+  },
+  "Object Literal": {
+    "prefix": "obj",
+    "body": [
+      "{",
+      "\t${1:key}: ${2:value},$0",
+      "}"
+    ],
+    "description": "Object literal"
+  },
+  "Array Literal": {
+    "prefix": "arr",
+    "body": "[${1:items}]",
+    "description": "Array literal"
+  },
+  "Log Statement": {
+    "prefix": "log",
+    "body": "log(${1:message});",
+    "description": "Log a message"
+  },
+  "Notify Statement": {
+    "prefix": "notify",
+    "body": "notify(${1:message});",
+    "description": "Show a notification"
+  },
+  "Get Current Line": {
+    "prefix": "gcl",
+    "body": "var ${1:line} = getCurrentLine();",
+    "description": "Get the current cursor line number"
+  },
+  "Get Line Text": {
+    "prefix": "glt",
+    "body": "var ${1:text} = getLineText(${2:lineNum});",
+    "description": "Get text of a specific line"
+  },
+  "Set Line Text": {
+    "prefix": "slt",
+    "body": "setLineText(${1:lineNum}, ${2:text});",
+    "description": "Set text of a specific line"
+  },
+  "Get Selection": {
+    "prefix": "gsel",
+    "body": "var ${1:selection} = getSelection();",
+    "description": "Get the current selection"
+  },
+  "Replace Selection": {
+    "prefix": "rsel",
+    "body": "replaceSelection(${1:text});",
+    "description": "Replace the selected text"
+  },
+  "Optional Chaining": {
+    "prefix": "?.",
+    "body": "${1:obj}?.${2:property}",
+    "description": "Optional chaining access"
+  },
+  "Nullish Coalescing": {
+    "prefix": "??",
+    "body": "${1:value} ?? ${2:default}",
+    "description": "Nullish coalescing operator"
+  },
+  "Map Array": {
+    "prefix": "map",
+    "body": "map(${1:array}, function(${2:item}) { return ${3:result}; })",
+    "description": "Map over an array"
+  },
+  "Filter Array": {
+    "prefix": "filter",
+    "body": "filter(${1:array}, function(${2:item}) { return ${3:condition}; })",
+    "description": "Filter an array"
+  }
+}

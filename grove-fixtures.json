@@ -17,7 +17,7 @@
       "type": "parser"
     },
     {
-      "path": "vendor/grammars/ghostlang/parser.c",
+      "path": "vendor/tree-sitter-ghostlang/src/parser.c",
       "checksum": "37c16bbaa50a46da64dbe2ceb1a1396edb11c4379f46105c62e8d4f42fb4c265",
       "size": 287608,
       "language": "ghostlang",
@@ -52,21 +52,21 @@
       "type": "parser"
     },
     {
-      "path": "vendor/grammars/ghostlang/queries/highlights.scm",
+      "path": "vendor/tree-sitter-ghostlang/queries/highlights.scm",
       "checksum": "9af50d7eecd3a93694dd02a18299006eab1ba3ed0c6cb6d9d58b18ccfc03151f",
       "size": 1959,
       "language": "ghostlang",
       "type": "query_highlights"
     },
     {
-      "path": "vendor/grammars/ghostlang/queries/locals.scm",
+      "path": "vendor/tree-sitter-ghostlang/queries/locals.scm",
       "checksum": "07382e2bf92ea0f99bd01849d1b4c3ad26b3e32febb451f49b223ad0bbb66045",
       "size": 1077,
       "language": "ghostlang",
       "type": "query_locals"
     },
     {
-      "path": "vendor/grammars/ghostlang/queries/textobjects.scm",
+      "path": "vendor/tree-sitter-ghostlang/queries/textobjects.scm",
       "checksum": "e0bb84b8ecf4e46f5feefbd8421983c2f1cc6d13e6273d0aa9ea08b48eba372c",
       "size": 1403,
       "language": "ghostlang",

@@ -1,5 +1,0 @@
-var config = {
-    theme: "dark",
-    fontSize: 14,
-    enabled: true
-};

@@ -12,8 +12,8 @@ const FoldingRange = Features.FoldingRange;
 const FoldingQueryError = Features.FoldingQueryError;
 const SymbolError = Features.SymbolError;
 
-const ghost_locals_query_source = @embedFile("../../vendor/grammars/ghostlang/queries/locals.scm");
-const ghost_textobjects_query_source = @embedFile("../../vendor/grammars/ghostlang/queries/textobjects.scm");
+const ghost_locals_query_source = @embedFile("../../vendor/tree-sitter-ghostlang/queries/locals.scm");
+const ghost_textobjects_query_source = @embedFile("../../vendor/tree-sitter-ghostlang/queries/textobjects.scm");
 
 const ghost_symbol_rules = [_]SymbolRule{
     .{

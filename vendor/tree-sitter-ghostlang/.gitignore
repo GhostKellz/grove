@@ -1,0 +1,34 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+*.log
+
+# Build outputs
+build/
+dist/
+*.node
+
+# Tree-sitter generated files (keep in git for vendoring)
+# src/grammar.json and src/node-types.json are committed
+# src/parser.c is committed (pre-generated)
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test temp files
+temp.ghost
+*.ghost.tmp
+
+# Documentation drafts
+TODO.md
+DEVELOPMENT_ROADMAP.md
+archive/

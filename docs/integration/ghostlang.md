@@ -8,7 +8,7 @@ Grove bundles the production Ghostlang Tree-sitter grammar with **full hybrid Lu
 
 - Call `grove.Languages.ghostlang.get()` to obtain the vendored `TSLanguage` wrapper.
 - File extension: `.gla` maps to Ghostlang sources in Grim.
-- The parser is built directly from `vendor/grammars/ghostlang/parser.c`.
+- The parser is built directly from `vendor/tree-sitter-ghostlang/src/parser.c`.
 
 ## Query Assets
 
@@ -30,7 +30,7 @@ Each file is ready to load through `grove.Query` helpers or custom pipelines. Gr
 
 ## Upstream Source
 
-- Repository: [`GhostKellz/ghostlang`](https://github.com/GhostKellz/ghostlang) (includes tree-sitter grammar)
+- Repository: [`GhostKellz/tree-sitter-ghostlang`](https://github.com/GhostKellz/tree-sitter-ghostlang)
 - Ghostlang Source Extension: `.gla`
 - Grammar Version: Phase A/B/C complete (Oct 2025)
 - Tree-sitter: 0.25+ (ABI 15)
@@ -47,7 +47,7 @@ Each file is ready to load through `grove.Query` helpers or custom pipelines. Gr
 
 ## Testing Tips
 
-- Regenerate the grammar by entering `tree-sitter-ghostlang/` and running:
+- Regenerate the grammar in the standalone `tree-sitter-ghostlang` repository and vendor its tracked files into `vendor/tree-sitter-ghostlang/`:
 
   ```bash
   npm install
@@ -57,7 +57,7 @@ Each file is ready to load through `grove.Query` helpers or custom pipelines. Gr
 
 - Grove’s unit tests cover `grove.Languages.ghostlang.get()`; add integration tests by parsing sample `.gla` fixtures and loading highlight queries through `grove.HighlightEngine`.
 
-For deeper context (plugin examples, theming guidance, etc.) see `vendor/tree-sitter-ghostlang/GROVE_INTEGRATION.md` in this repository.
+For deeper context, see `vendor/tree-sitter-ghostlang/docs/integration/grove.md` in this repository.
 
 ---
 

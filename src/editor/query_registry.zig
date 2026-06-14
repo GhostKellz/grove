@@ -34,19 +34,19 @@ const query_presets = [_]QueryPreset{
     .{
         .language = .ghostlang,
         .query_type = .highlights,
-        .source = @embedFile("../../vendor/grammars/ghostlang/queries/highlights.scm"),
+        .source = @embedFile("../../vendor/tree-sitter-ghostlang/queries/highlights.scm"),
         .description = "Ghostlang syntax highlighting queries",
     },
     .{
         .language = .ghostlang,
         .query_type = .locals,
-        .source = @embedFile("../../vendor/grammars/ghostlang/queries/locals.scm"),
+        .source = @embedFile("../../vendor/tree-sitter-ghostlang/queries/locals.scm"),
         .description = "Ghostlang local symbol queries for document outline",
     },
     .{
         .language = .ghostlang,
         .query_type = .textobjects,
-        .source = @embedFile("../../vendor/grammars/ghostlang/queries/textobjects.scm"),
+        .source = @embedFile("../../vendor/tree-sitter-ghostlang/queries/textobjects.scm"),
         .description = "Ghostlang textobject queries for folding and navigation",
     },
 

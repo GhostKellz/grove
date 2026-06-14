@@ -157,7 +157,7 @@ const Parser = @import("../core/parser.zig").Parser;
 const highlight_query_source =
     \\(pair key: (string) @property value: [(string) (true) (false) (null)] @value)
 ;
-const ghost_highlight_query_source = @embedFile("../../vendor/grammars/ghostlang/queries/highlights.scm");
+const ghost_highlight_query_source = @embedFile("../../vendor/tree-sitter-ghostlang/queries/highlights.scm");
 const typescript_highlight_query_source = @embedFile("../../vendor/grammars/typescript/queries/highlights.scm");
 const tsx_highlight_query_source = @embedFile("../../vendor/grammars/tsx/queries/highlights.scm");
 

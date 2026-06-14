@@ -1,0 +1,12 @@
+.vscode/**
+.gitignore
+.git/**
+*.map
+*.ts
+**/*.ts
+src/**
+node_modules/**
+.npmignore
+webpack.config.js
+tsconfig.json
+**/.DS_Store

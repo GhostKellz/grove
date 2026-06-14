@@ -1,0 +1,32 @@
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+
+# Test files
+test/
+*.test.js
+
+# Build files (include pre-built parser.c)
+build/
+node_modules/
+
+# Documentation
+GROVE_INTEGRATION.md
+UPGRADE_v0.1.0.md
+TODO.md
+DEVELOPMENT_ROADMAP.md
+archive/
+
+# Temp files
+temp.ghost
+*.ghost.tmp
+*.log
+
+# Editor files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

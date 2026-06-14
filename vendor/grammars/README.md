@@ -9,7 +9,6 @@ We ship pre-generated Tree-sitter grammars to keep Grove builds deterministic an
 | JSON | [tree-sitter/tree-sitter-json](https://github.com/tree-sitter/tree-sitter-json) | master | 2025-10-03 |
 | Zig | [maxxnino/tree-sitter-zig](https://github.com/maxxnino/tree-sitter-zig) | master | 2025-10-03 |
 | Rust | [tree-sitter/tree-sitter-rust](https://github.com/tree-sitter/tree-sitter-rust) | master | 2025-10-03 |
-| Ghostlang | [ghostlang/tree-sitter-ghostlang](https://github.com/ghostlang/tree-sitter-ghostlang) | archive/2025-10-03 | 2025-10-03 |
 | TypeScript | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master | 2025-10-03 |
 | TSX | [tree-sitter/tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript) | master | 2025-10-03 |
 | Bash | [tree-sitter/tree-sitter-bash](https://github.com/tree-sitter/tree-sitter-bash) | master | 2025-10-03 |
@@ -45,3 +44,5 @@ vendor/grammars/
 ```
 
 Future grammars should follow the same pattern. Include any additional auxiliary sources (e.g., `scanner.cc`) next to `parser.c`.
+
+Ghostlang is maintained as a full standalone grammar package under `vendor/tree-sitter-ghostlang` instead of this compact snapshot layout.

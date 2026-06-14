@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.11] - 2026-06-14
+
+### Changed
+- Refreshed the vendored Ghostlang tree-sitter grammar from the standalone `GhostKellz/tree-sitter-ghostlang` repository.
+- Consolidated Grove to a single Ghostlang grammar source under `vendor/tree-sitter-ghostlang`.
+
+### Removed
+- Removed duplicate/stale Ghostlang grammar snapshots and committed local build/dependency artifacts from the Grove tree.
+
 ## [0.2.10] - 2026-06-04
 
 ### Changed

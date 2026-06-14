@@ -1,0 +1,95 @@
+====================================
+Optional chaining property access
+====================================
+
+var name = user?.name;
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (optional_chain_expression
+      object: (identifier)
+      property: (identifier))))
+
+====================================
+Optional chaining subscript access
+====================================
+
+var item = arr?[0];
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (optional_subscript_expression
+      object: (identifier)
+      index: (number_literal))))
+
+====================================
+Optional chaining function call
+====================================
+
+var result = callback?.(arg);
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (optional_call_expression
+      function: (identifier)
+      arguments: (argument_list (identifier)))))
+
+====================================
+Nullish coalescing operator
+====================================
+
+var value = x ?? "default";
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (nullish_coalescing_expression
+      left: (identifier)
+      right: (string_literal))))
+
+====================================
+Chained optional access
+====================================
+
+var deep = obj?.user?.profile?.name;
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (optional_chain_expression
+      object: (optional_chain_expression
+        object: (optional_chain_expression
+          object: (identifier)
+          property: (identifier))
+        property: (identifier))
+      property: (identifier))))
+
+====================================
+Optional chaining with nullish coalescing
+====================================
+
+var name = user?.name ?? "Anonymous";
+
+---
+
+(source_file
+  (variable_declaration
+    name: (identifier)
+    value: (nullish_coalescing_expression
+      left: (optional_chain_expression
+        object: (identifier)
+        property: (identifier))
+      right: (string_literal))))

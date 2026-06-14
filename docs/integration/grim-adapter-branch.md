@@ -9,7 +9,7 @@ This document coordinates the Grove ↔ Grim touchpoints required to validate `.
 - **Artifacts:**
   - Branch spec at `archive/grim/branches/ghostlang-adapter/README.md`
   - Grove utility module `src/editor/ghostlang.zig`
-  - Ghostlang locals/textobjects queries (`vendor/grammars/ghostlang/queries/*.scm`)
+  - Ghostlang locals/textobjects queries (`vendor/tree-sitter-ghostlang/queries/*.scm`)
 
 ## Branch Setup Checklist
 
