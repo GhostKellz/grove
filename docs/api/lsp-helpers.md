@@ -636,7 +636,7 @@ fn zigSymbolMapper(node_kind: []const u8) ?grove.LSP.SymbolKind {
 
 ## See Also
 
-- [Grove README](../README.md) - Main documentation
+- [Grove Documentation](../README.md) - Main documentation index
 - [API Reference](./API.md) - Complete API documentation
 - [Editor Integration Guide](./EDITOR_INTEGRATION.md) - Building editors with Grove
 - [GhostLS Source](https://github.com/ghostkellz/ghostls) - Real-world LSP usage

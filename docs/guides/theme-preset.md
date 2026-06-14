@@ -446,8 +446,8 @@ test "load tokyonight theme" {
 ## References
 
 - [Tree-sitter Query Documentation](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries)
-- [Grim Editor Architecture](../docs/DESIGN.md)
-- [Phantom.grim Plugin System](../../grim/docs/phantom-architecture.md)
+- [Grim Adapter Branch](../integration/grim-adapter-branch.md)
+- [Ghostlang Integration](../integration/ghostlang.md)
 - [Ghostlang Language Spec](https://github.com/ghostkellz/ghostlang)
 
 ---

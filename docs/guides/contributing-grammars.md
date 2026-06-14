@@ -396,7 +396,7 @@ test "your_language parsing" {
 
 ### 7.1 Update README
 
-Add your language to the supported languages list in README.md.
+Add your language to the supported languages list in the project README.
 
 ### 7.2 Add Examples
 
@@ -409,7 +409,7 @@ mkdir -p examples/your_language
 
 ### 7.3 Update Documentation
 
-Add language-specific documentation in `docs/languages/`:
+Add language-specific documentation in the appropriate `docs/` folder:
 
 ```markdown
 # Your Language Support
@@ -492,7 +492,7 @@ zig build bench
 - [Tree-sitter Documentation](https://tree-sitter.github.io/tree-sitter/)
 - [Tree-sitter Grammar Collection](https://github.com/tree-sitter)
 - [Query Syntax Reference](https://tree-sitter.github.io/tree-sitter/using-parsers#query-syntax)
-- [Grove Architecture Overview](docs/architecture.md)
+- [Grove Architecture Overview](../architecture/overview.md)
 
 ## Getting Help
 

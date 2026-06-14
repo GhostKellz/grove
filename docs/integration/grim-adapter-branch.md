@@ -39,7 +39,7 @@ This document coordinates the Grove ↔ Grim touchpoints required to validate `.
    - Capture findings in `archive/grim/branches/ghostlang-adapter/SMOKE.md`.
 
 5. **Report back**
-   - Update `CODEX.md` Status Log with results.
+   - Record results in the relevant project status notes.
    - Mark Grove Alpha checklist items complete (see `TODO.md`).
    - Mirror follow-up actions in `GRIM_TODO.md` before requesting merge into Grim `main`.
 

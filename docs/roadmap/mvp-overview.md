@@ -44,4 +44,4 @@ pub fn main() !void {
 - Vendored Zig grammar and registry expansion.
 - Async scheduling via Zsync and integration with Grim + Ghostlang.
 
-Consult `ROADMAP.md` for milestone-level planning and `CODEX.md` for project operations.
+Consult [project-roadmap.md](project-roadmap.md) for milestone-level planning.

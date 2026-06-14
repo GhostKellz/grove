@@ -125,4 +125,4 @@ fn parseSource(source: []const u8, allocator: std.mem.Allocator) !void {
 - `Node.toSExpression` allocates a new buffer; caller owns the returned slice.
 - Memory diagnostics rely on Zig testing; integration with external leak detectors is planned.
 
-For additional context see `docs/mvp-overview.md`, `CODEX.md`, and `ROADMAP.md`.
+For additional context see [../roadmap/mvp-overview.md](../roadmap/mvp-overview.md) and [../roadmap/project-roadmap.md](../roadmap/project-roadmap.md).

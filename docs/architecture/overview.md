@@ -56,11 +56,10 @@ The MVP keeps execution synchronous; Zsync-based scheduling will wrap these APIs
 ## Testing Strategy
 - Zig unit tests ensure error surfaces behave as expected (`LanguageNotSet`, null language detection).
 - `zig build test` compiles all C dependencies and verifies the wrappers end-to-end.
-- Fuzz tests will extend the parser suite once edit translation is implemented (tracked in ROADMAP Alpha tasks).
+- Fuzz tests will extend the parser suite once edit translation is implemented (tracked in the roadmap Alpha tasks).
 
 ## Related Documents
-- `CODEX.md` – operational handbook and milestone plan.
-- `ROADMAP.md` – phase-by-phase deliverables.
-- `docs/mvp-overview.md` – shipped MVP functionality.
-- `docs/api-parser.md` – detailed parser API reference.
-- `docs/integration/ghostlang.md` – Ghostlang language + query integration notes.
+- [../roadmap/project-roadmap.md](../roadmap/project-roadmap.md) - phase-by-phase deliverables.
+- [../roadmap/mvp-overview.md](../roadmap/mvp-overview.md) - shipped MVP functionality.
+- [../api/parser.md](../api/parser.md) - detailed parser API reference.
+- [../integration/ghostlang.md](../integration/ghostlang.md) - Ghostlang language and query integration notes.

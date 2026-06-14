@@ -183,5 +183,5 @@ const gshell = try grove.Languages.gshell.get();
 ## Next Steps
 
 - See [examples/](../examples/) for complete working examples
-- Check [ERROR_HANDLING.md](ERROR_HANDLING.md) for robust error handling patterns
-- Read the main [README.md](../README.md) for full API documentation
+- Check [error-handling.md](error-handling.md) for robust error handling patterns
+- Read the [documentation index](../README.md) for full API documentation
